@@ -1,10 +1,10 @@
 import torch
 import json
 import argparse
-from Miniproject_1.others.network import build_network
-from Miniproject_1.others.dataset import build_dataset
-from Miniproject_1.others.train import train
-from torch.utils.tensorboard import SummaryWriter
+from utils.network import build_network
+from utils.dataset import build_dataset
+from src.train import train
+# from torch.utils.tensorboard import SummaryWriter
 
 
 def get_args():
@@ -28,12 +28,12 @@ if __name__ == "__main__":
     # Get network
     net = build_network(config)
     net.to(device=device)
-    print(f"The model has: {sum(p.numel() for p in net.parameters() if p.requires_grad)} parameters !")
 
     # Get dataset
-    train_dataset = build_dataset(config, config["train_data"], train=True)
-    val_dataset = build_dataset(config, config["val_data"])
+    dataset = build_dataset(config, config["data"], train=True)
 
     # Train network
-    writer = SummaryWriter(log_dir=config["log_dir"])
-    train(train_dataset, val_dataset, net, config, writer,  device=device)
+    # TODO: check this writer
+    # writer = SummaryWriter(log_dir=config["log_dir"])
+    writer = None
+    train(dataset, net, config, writer,  device=device)

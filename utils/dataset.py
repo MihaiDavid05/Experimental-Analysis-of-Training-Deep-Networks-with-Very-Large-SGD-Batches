@@ -1,41 +1,11 @@
 import torch
-from Miniproject_1.others.data_augmentation import Augmenter
 from torch.utils.data import Dataset
-
-
-class TensorDataset(Dataset):
-    """
-    Dataset class used for provided framework.
-    """
-    def __init__(self, augmenter=None):
-        self._noisy_tensor_train, self._noisy_tensor_target = None, None
-        self.augmenter = augmenter
-
-    def set_tensors(self, train, target):
-        self._noisy_tensor_train = train
-        self._noisy_tensor_target = target
-        if self.augmenter is not None:
-            print("Augmenting data...\n")
-            self._noisy_tensor_train, self._noisy_tensor_target = self.augmenter.augment_data(self._noisy_tensor_train,
-                                                                                              self._noisy_tensor_target)
-            print("Augmenting data FINISHED!\n")
-
-        print(f"\nDataset of size {self.__len__()}")
-
-    def __len__(self):
-        if self._noisy_tensor_train is not None:
-            return self._noisy_tensor_train.size(dim=0)
-        else:
-            return 0
-
-    def __getitem__(self, idx):
-        return {
-            'image': (self._noisy_tensor_train[idx] / 255.0).float(),
-            'target':  (self._noisy_tensor_target[idx] / 255.0).float(),
-        }
-
+from torchvision.datasets import CIFAR10
+from torchvision.datasets import CIFAR100
+import torchvision.transforms as transforms
 
 class BaseDataset(Dataset):
+    # TODO: See this class
     """
     NOTE: Dataset class used only in our experiments!
     """
@@ -74,12 +44,21 @@ def build_dataset(config, data_dir, train=False):
     Returns: dataset_type instance
 
     """
-
-    if config["dataset"] == 'basic':
+    t = transforms.Compose([transforms.ToTensor()])
+    if config["dataset"] == 'cifar10':
         if config["augmentations"] != 0 and train:
-            dataset = BaseDataset(data_dir, config["subset"], Augmenter(config))
+            dataset = CIFAR10(data_dir, train, transform=t, target_transform=None, download=False)
         else:
-            dataset = BaseDataset(data_dir, config["subset"])
+            # TODO: Check augmentations
+            # t = new t
+            dataset = CIFAR10(data_dir, train, transform=t, target_transform=None, download=False)
+    elif config["dataset"] == 'cifar100':
+        if config["augmentations"] != 0 and train:
+            dataset = CIFAR100(data_dir, train, transform=t, target_transform=None, download=False)
+        else:
+            # TODO: Check augmentations
+            # t = new t
+            dataset = CIFAR100(data_dir, train, transform=t, target_transform=None, download=False)
     else:
         raise KeyError("Dataset specified not implemented")
     return dataset

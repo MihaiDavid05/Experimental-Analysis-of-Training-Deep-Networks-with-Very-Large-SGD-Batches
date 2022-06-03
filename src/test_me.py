@@ -3,9 +3,9 @@ import argparse
 import json
 import numpy as np
 import PIL
-from Miniproject_1.others.network import build_network
-from Miniproject_1.others.dataset import build_dataset
-from Miniproject_1.others.train import predict
+from utils.network import build_network
+from utils.dataset import build_dataset
+from src.train import predict
 
 
 def get_args():

@@ -42,18 +42,4 @@ class Augmenter:
                 images = torch.vstack([images, new_images])
                 targets = torch.vstack([targets, new_targets])
 
-        if self.augmentations["interchange_pixels"] == 1:
-            for i in range(images.size()[0] // 2):
-                image = torch.flatten(images[i], 1, 2)
-                img_size = image.shape[1]
-                image_copy = torch.clone(image)
-                target = torch.flatten(targets[i], 1, 2)
-                indexes = torch.randint(img_size, size=(img_size // 4, ))
-                image[:, indexes] = target[:, indexes]
-                target[:, indexes] = image_copy[:, indexes]
-                image = torch.reshape(image, images[i].size())
-                target = torch.reshape(target, targets[i].size())
-                images = torch.vstack([images, image.unsqueeze(dim=0)])
-                targets = torch.vstack([targets, target.unsqueeze(dim=0)])
-
         return images, targets

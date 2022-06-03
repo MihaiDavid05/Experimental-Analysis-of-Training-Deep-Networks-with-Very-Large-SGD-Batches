@@ -3,13 +3,11 @@ from torch.utils.data import DataLoader
 from torch import optim
 import torch.nn as nn
 from tqdm import tqdm
-from Miniproject_1.others.utils import psnr
+from utils.utils import psnr
+from torch.utils.data import random_split
 
 
-# NOTE: THIS SCRIPT WAS ONLY USED IN OUR EXPERIMENTS, TOGETHER WITH A run.py FILE NOT PROVIDED!
-
-
-def train(train_images, val_images, net, config, writer, device='cpu'):
+def train(dataset, net, config, writer, device='cpu'):
     batch_size = config["batch_size"]
     epochs = config["epochs"]
     checkpoint_dir = config["checkpoint_dir"]
@@ -17,32 +15,39 @@ def train(train_images, val_images, net, config, writer, device='cpu'):
     use_lr_scheduler = config["use_lr_scheduler"]
 
     # Create PyTorch DataLoaders
+    train_images, val_images = random_split(dataset, [int(len(dataset) * 0.8), int(len(dataset) * 0.2)],
+                                            generator=torch.Generator().manual_seed(42))
+
     train_loader = DataLoader(train_images, shuffle=True, batch_size=batch_size)
     val_loader = DataLoader(val_images, shuffle=False, batch_size=1, drop_last=True)
     optimizer = optim.Adam(net.parameters(), lr=lr, betas=(0.9, 0.999), eps=1e-08, amsgrad=False)
     scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, mode='min', patience=epochs/4, factor=0.5, verbose=True)
-    criterion = nn.MSELoss()
+    criterion = nn.CrossEntropyLoss()
+
+    # Initialize variables
     global_step = 0
     max_val_score = 0
     best_val_loss = 10000
     patience = 0
+
     # Train
     print("Training started !\n")
-
     for epoch in range(epochs):
         # Train step
         net.train()
         epoch_loss = 0
         for batch in tqdm(train_loader):
             # Get image and target
-            images = batch['image'].to(device=device, dtype=torch.float32)
-            targets = batch['target'].to(device=device, dtype=torch.float32)
+            images = batch[0].to(device=device, dtype=torch.float32)
+            # TODO: Check this
+            # targets = batch[1].to(device=device, dtype=torch.float32)
+            targets = batch[1].to(device=device)
             # Forward pass
             optimizer.zero_grad()
             preds = net(images)
             # Compute loss
             loss = criterion(preds, targets)
-            writer.add_scalar("Lr", optimizer.param_groups[0]['lr'], global_step)
+            # writer.add_scalar("Lr", optimizer.param_groups[0]['lr'], global_step)
             # Perform backward pass
             loss.backward()
             optimizer.step()
@@ -54,7 +59,6 @@ def train(train_images, val_images, net, config, writer, device='cpu'):
 
         # Evaluate model after each epoch
         print(f'Validation started !\n')
-
         net.eval()
         # Initialize varibales
         num_val_batches = len(val_loader)
@@ -62,8 +66,8 @@ def train(train_images, val_images, net, config, writer, device='cpu'):
         val_loss = 0
         for i, batch in tqdm(enumerate(val_loader)):
             # Get image and gt masks
-            images = batch['image'].to(device=device, dtype=torch.float32)
-            targets = batch['target'].to(device=device, dtype=torch.float32)
+            images = batch[0].to(device=device, dtype=torch.float32)
+            targets = batch[1].to(device=device)
 
             with torch.no_grad():
                 # Forward pass
@@ -71,8 +75,9 @@ def train(train_images, val_images, net, config, writer, device='cpu'):
                 # Compute validation loss
                 loss = criterion(preds, targets)
                 val_loss += loss.item()
-                # Compute PSNR
-                val_score += psnr(preds, targets)
+                # Compute accuracy
+                # TODO: Check this accuracy
+                val_score += 0
                 # # Add images to tensorboard
                 # writer.add_image("Prediction0", torch.clamp(preds[0], 0, 1).float().detach().cpu(), global_step)
                 # writer.add_image("Target0", targets[0].float().detach().cpu(), global_step)
@@ -99,7 +104,7 @@ def train(train_images, val_images, net, config, writer, device='cpu'):
         if use_lr_scheduler == 1:
             scheduler.step(val_loss)
 
-        writer.add_scalars('Loss', {'train': epoch_loss, 'val': val_loss}, global_step)
+        # writer.add_scalars('Loss', {'train': epoch_loss, 'val': val_loss}, global_step)
 
         if val_score > max_val_score:
             max_val_score = val_score
@@ -109,7 +114,7 @@ def train(train_images, val_images, net, config, writer, device='cpu'):
 
         print('Validation PNR score is: {}\n'.format(val_score))
 
-        writer.add_scalar("PSNR/val", val_score, global_step)
+        # writer.add_scalar("PSNR/val", val_score, global_step)
 
 
 def predict(test_image, net, device='cpu'):
