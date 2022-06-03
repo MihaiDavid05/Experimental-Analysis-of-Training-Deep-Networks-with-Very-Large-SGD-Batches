@@ -1,4 +1,4 @@
-# DL_project
+# OML_project
 
 ### 1.Folders
 You may need to create ```logs``` and ```checkpoints``` folders under root directory. They are gitignored.

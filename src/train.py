@@ -6,7 +6,7 @@ from tqdm import tqdm
 from Miniproject_1.others.utils import psnr
 
 
-# NOTE: THIS SCRIPT WAS ONLY USED IN OUR EXPERIMENTS, TOGETHER WITH A main.py FILE NOT PROVIDED!
+# NOTE: THIS SCRIPT WAS ONLY USED IN OUR EXPERIMENTS, TOGETHER WITH A run.py FILE NOT PROVIDED!
 
 
 def train(train_images, val_images, net, config, writer, device='cpu'):
