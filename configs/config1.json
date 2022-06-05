@@ -1,13 +1,14 @@
 {
-  "name": "config1",
+  "name": "",
   "data": "data",
   "log_dir": "logs",
   "model": "vgg13_bn",
   "dataset": "cifar10",
-  "batch_size": 512,
+  "batch_size": 100,
   "epochs": 40,
   "learning_rate": 0.001,
   "use_lr_scheduler": "ReduceOnPlateau",
+  "optimizer": "adam",
   "checkpoint_dir": "checkpoints",
   "augmentations": 0
 }

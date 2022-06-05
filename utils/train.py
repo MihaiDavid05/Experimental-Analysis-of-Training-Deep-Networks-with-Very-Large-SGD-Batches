@@ -12,6 +12,8 @@ def train(dataset, net, config, writer, device='cpu'):
     checkpoint_dir = config["checkpoint_dir"]
     lr = config["learning_rate"]
     use_lr_scheduler = config["use_lr_scheduler"]
+    opt = config["optimizer"]
+    scheduler = None
 
     # Create PyTorch DataLoaders
     train_images, val_images = random_split(dataset, [int(len(dataset) * 0.8), int(len(dataset) * 0.2)],
@@ -20,7 +22,14 @@ def train(dataset, net, config, writer, device='cpu'):
     val_loader = DataLoader(val_images, shuffle=False, batch_size=1, drop_last=True)
 
     # Define optimizer, lr scheduler and criterion
-    optimizer = optim.Adam(net.parameters(), lr=lr, betas=(0.9, 0.999), eps=1e-08, amsgrad=False)
+    if opt == "adam":
+        optimizer = optim.Adam(net.parameters(), lr=lr, betas=(0.9, 0.999), eps=1e-08, amsgrad=False)
+    elif opt == "sgd":
+        # TODO: Check this
+        optimizer = None
+        pass
+    else:
+        raise KeyError("LR scheduler not properly set !")
     if use_lr_scheduler == 'ReduceOnPlateau':
         scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, mode='min', patience=epochs/4, factor=0.5,
                                                          verbose=True)
@@ -109,7 +118,7 @@ def train(dataset, net, config, writer, device='cpu'):
         val_score = ((n_correct * 1.0) / (n_correct + n_wrong)) * 100
 
         # Update learning rate accordingly
-        if use_lr_scheduler != 0:
+        if scheduler is not None:
             scheduler.step(val_loss)
 
         # Add loss to tensorboard

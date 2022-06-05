@@ -1,15 +1,15 @@
 import torch
 import argparse
-import json
 from utils.network import build_network
 from utils.dataset import build_dataset
-from src.train import predict
+from utils.train import predict
+from utils.utils import setup
 
 
 def get_args():
     parser = argparse.ArgumentParser()
-    parser.add_argument("config_path", help="Path to config")
-    parser.add_argument("model_path", help="Path to model")
+    parser.add_argument('config_filename', type=str, help='Configuration filename that you want to use during the run.')
+    parser.add_argument('model', type=str, help='Checkpoint name, under checkpoints folder, for the model weights.')
     arguments = parser.parse_args()
     return arguments
 
@@ -17,18 +17,14 @@ def get_args():
 if __name__ == "__main__":
     args = get_args()
 
-    # Get config
-    with open(args.config_path) as json_config:
-        config = json.load(json_config)
-
-    # Get device
-    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-    print('Device state: ', device)
+    # Get configuration and device
+    config, device, _, _ = setup(args)
 
     # Get network
     net = build_network(config)
     net.to(device=device)
-    net.load_state_dict(torch.load(args.model_path, map_location=device))
+    model_path = config["checkpoint_dir"] + '/' + args.model + '.pth'
+    net.load_state_dict(torch.load(model_path, map_location=device))
 
     # Get an image
     test_dataset = build_dataset(config, config["data"])
