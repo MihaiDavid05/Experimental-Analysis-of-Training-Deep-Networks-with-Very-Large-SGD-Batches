@@ -1,15 +1,15 @@
 import torch
-import json
 import argparse
+import json
 from utils.network import build_network
 from utils.dataset import build_dataset
-from src.train import train
-# from torch.utils.tensorboard import SummaryWriter
+from src.train import predict
 
 
 def get_args():
     parser = argparse.ArgumentParser()
     parser.add_argument("config_path", help="Path to config")
+    parser.add_argument("model_path", help="Path to model")
     arguments = parser.parse_args()
     return arguments
 
@@ -25,15 +25,13 @@ if __name__ == "__main__":
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     print('Device state: ', device)
 
-    # Get dataset
-    dataset = build_dataset(config, config["data"], train=True)
-
     # Get network
     net = build_network(config)
     net.to(device=device)
+    net.load_state_dict(torch.load(args.model_path, map_location=device))
 
-    # Train network
-    # TODO: check this writer
-    # writer = SummaryWriter(log_dir=config["log_dir"])
-    writer = None
-    train(dataset, net, config, writer,  device=device)
+    # Get an image
+    test_dataset = build_dataset(config, config["data"])
+
+    # Make predictions
+    predict(test_dataset, net, device, [0, 1])

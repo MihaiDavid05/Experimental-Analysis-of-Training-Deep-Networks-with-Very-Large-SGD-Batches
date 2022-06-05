@@ -1,18 +1,13 @@
 {
+  "name": "config1",
   "data": "data",
   "log_dir": "logs",
   "model": "vgg13_bn",
   "dataset": "cifar10",
-  "batch_size": 100,
+  "batch_size": 512,
   "epochs": 40,
   "learning_rate": 0.001,
-  "use_lr_scheduler": 0,
+  "use_lr_scheduler": "ReduceOnPlateau",
   "checkpoint_dir": "checkpoints",
-   "augmentations": {
-    "horizontal_flip": 1,
-    "vertical_flip": 1,
-     "vertical_horizontal_flip": 1,
-     "swap_input_target": 1,
-     "interchange_pixels": 0
-  }
+  "augmentations": 0
 }

@@ -3,7 +3,6 @@ from torch.utils.data import DataLoader
 from torch import optim
 import torch.nn as nn
 from tqdm import tqdm
-from utils.utils import psnr
 from torch.utils.data import random_split
 
 
@@ -17,11 +16,16 @@ def train(dataset, net, config, writer, device='cpu'):
     # Create PyTorch DataLoaders
     train_images, val_images = random_split(dataset, [int(len(dataset) * 0.8), int(len(dataset) * 0.2)],
                                             generator=torch.Generator().manual_seed(42))
-
     train_loader = DataLoader(train_images, shuffle=True, batch_size=batch_size)
     val_loader = DataLoader(val_images, shuffle=False, batch_size=1, drop_last=True)
+
+    # Define optimizer, lr scheduler and criterion
     optimizer = optim.Adam(net.parameters(), lr=lr, betas=(0.9, 0.999), eps=1e-08, amsgrad=False)
-    scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, mode='min', patience=epochs/4, factor=0.5, verbose=True)
+    if use_lr_scheduler == 'ReduceOnPlateau':
+        scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, mode='min', patience=epochs/4, factor=0.5,
+                                                         verbose=True)
+    elif use_lr_scheduler != 0:
+        raise KeyError("LR scheduler not properly set !")
     criterion = nn.CrossEntropyLoss()
 
     # Initialize variables
@@ -39,9 +43,7 @@ def train(dataset, net, config, writer, device='cpu'):
         for batch in tqdm(train_loader):
             # Get image and target
             images = batch[0].to(device=device, dtype=torch.float32)
-            # TODO: Check this
-            # targets = batch[1].to(device=device, dtype=torch.float32)
-            targets = batch[1].to(device=device)
+            targets = batch[1].to(device=device, dtype=torch.long)
             # Forward pass
             optimizer.zero_grad()
             preds = net(images)
@@ -54,20 +56,24 @@ def train(dataset, net, config, writer, device='cpu'):
             # Update global step value and epoch loss
             global_step += 1
             epoch_loss += loss.item()
+
         epoch_loss = epoch_loss / len(train_loader)
         print(f'\nEpoch: {epoch} -> train_loss: {epoch_loss} \n')
 
         # Evaluate model after each epoch
         print(f'Validation started !\n')
         net.eval()
+
         # Initialize varibales
-        num_val_batches = len(val_loader)
-        val_score = 0
         val_loss = 0
+        n_correct = 0
+        n_wrong = 0
+
+        # Validation
         for i, batch in tqdm(enumerate(val_loader)):
-            # Get image and gt masks
+            # Get image and target
             images = batch[0].to(device=device, dtype=torch.float32)
-            targets = batch[1].to(device=device)
+            targets = batch[1].to(device=device, dtype=torch.long)
 
             with torch.no_grad():
                 # Forward pass
@@ -76,12 +82,13 @@ def train(dataset, net, config, writer, device='cpu'):
                 loss = criterion(preds, targets)
                 val_loss += loss.item()
                 # Compute accuracy
-                # TODO: Check this accuracy
-                val_score += 0
-                # # Add images to tensorboard
-                # writer.add_image("Prediction0", torch.clamp(preds[0], 0, 1).float().detach().cpu(), global_step)
+                pred_class = torch.argmax(preds, dim=1)
+                if pred_class == targets:
+                    n_correct += 1
+                else:
+                    n_wrong += 1
+                # # Add image to tensorboard
                 # writer.add_image("Target0", targets[0].float().detach().cpu(), global_step)
-                # writer.add_image("Image0", images[0].float().detach().cpu(), global_step)
 
         net.train()
         # Update validation loss
@@ -93,38 +100,47 @@ def train(dataset, net, config, writer, device='cpu'):
         else:
             best_val_loss = val_loss
             patience = 0
-
         if patience == epochs // 2:
             print("Training stopped due to early stopping with patience {}.".format(patience))
             break
 
         print(f'\nEpoch: {epoch} -> val_loss: {val_loss}\n')
-        val_score = val_score / num_val_batches
+        # Compute overall validation score
+        val_score = ((n_correct * 1.0) / (n_correct + n_wrong)) * 100
 
-        if use_lr_scheduler == 1:
+        # Update learning rate accordingly
+        if use_lr_scheduler != 0:
             scheduler.step(val_loss)
 
+        # Add loss to tensorboard
         # writer.add_scalars('Loss', {'train': epoch_loss, 'val': val_loss}, global_step)
 
+        # Save model if necessary
         if val_score > max_val_score:
             max_val_score = val_score
-            print("Current maximum validation score is: {}\n".format(max_val_score))
-            torch.save(net.state_dict(), checkpoint_dir + '/bestmodel.pth')
+            print("Current maximum validation accuracy is: {}\n".format(max_val_score))
+            torch.save(net.state_dict(), checkpoint_dir + f"/bestmodel_{epoch}.pth")
             print(f'Checkpoint {epoch} saved!\n')
 
-        print('Validation PNR score is: {}\n'.format(val_score))
-
-        # writer.add_scalar("PSNR/val", val_score, global_step)
-
-
-def predict(test_image, net, device='cpu'):
-    test_image = test_image / 255.0
-    test_image = test_image.to(device=device, dtype=torch.float32)
-    # Load model
-    net.load_state_dict(torch.load('checkpoints/bestmodel.pth', map_location=device))
-    net.eval()
-    with torch.no_grad():
-        pred = net(test_image)
-    return torch.clamp(pred, 0, 1) * 255
+        print('Validation accuracy is: {}\n'.format(val_score))
+        # Add val accuracy to tensorboard
+        # writer.add_scalar("Accuracy/val", val_score, global_step)
 
 
+def predict(test_dataset, net, device, img_indexes):
+    # Get prediction for specific indexes
+    for IMAGE_INDEX in img_indexes:
+        # Get test image
+        test_image = torch.unsqueeze(torch.tensor(test_dataset.data[IMAGE_INDEX].transpose(2, 0, 1)), dim=0)
+        test_image = test_image.to(device=device, dtype=torch.float32)
+
+        # Make prediction
+        net.eval()
+        with torch.no_grad():
+            pred = net(test_image)
+
+        # Get prediction and target string class
+        pred_class = torch.argmax(pred, dim=1).detach().cpu().numpy()[0]
+        pred_string = test_dataset.classes[pred_class]
+        target_string = test_dataset.classes[test_dataset.targets[IMAGE_INDEX]]
+        print(f"Prediction for image {IMAGE_INDEX} is {pred_string} and target is {target_string}")
