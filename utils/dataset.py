@@ -10,7 +10,7 @@ def build_dataset(config, data_dir, train=False):
         data_dir: Path to data
         train: True when building dataset for training
 
-    Returns: dataset_type instance
+    Returns: Dataset instance
 
     """
     t = transforms.Compose([transforms.ToTensor()])

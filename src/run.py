@@ -7,6 +7,12 @@ from utils.utils import setup
 
 
 def get_args():
+    """
+    Function used for parsing the command line arguments
+
+    Returns: Command line arguments
+
+    """
     parser = argparse.ArgumentParser()
     parser.add_argument('config_filename', type=str, help='Configuration filename that you want to use during the run.')
     arguments = parser.parse_args()

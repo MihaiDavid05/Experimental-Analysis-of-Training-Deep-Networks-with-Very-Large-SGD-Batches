@@ -8,7 +8,7 @@ def build_network(config):
     Args:
         config: Config dictionary
 
-    Returns: Network
+    Returns: Network instance
 
     """
     # Define number of classes according to dataset being used

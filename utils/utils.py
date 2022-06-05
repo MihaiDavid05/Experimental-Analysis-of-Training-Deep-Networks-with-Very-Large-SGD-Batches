@@ -8,7 +8,7 @@ def setup(args):
     Args:
         args: Command line arguments
 
-    Returns: Configuration dictionary, device and logging directory
+    Returns: Configuration dictionary, device, logging directory and checkpoint directory
 
     """
     # Create configs, logs and checkpoints folder

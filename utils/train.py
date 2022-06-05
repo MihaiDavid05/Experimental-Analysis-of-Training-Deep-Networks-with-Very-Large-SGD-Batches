@@ -7,6 +7,16 @@ from torch.utils.data import random_split
 
 
 def train(dataset, net, config, writer, device='cpu'):
+    """
+    Function used for training.
+    Args:
+        dataset: Dataset instance
+        net: Network instance
+        config: Configuration dictionary
+        writer: Writer object used for tensorboard
+        device: Selected device (CPU or GPU)
+
+    """
     batch_size = config["batch_size"]
     epochs = config["epochs"]
     checkpoint_dir = config["checkpoint_dir"]
@@ -136,9 +146,22 @@ def train(dataset, net, config, writer, device='cpu'):
         # writer.add_scalar("Accuracy/val", val_score, global_step)
 
 
-def predict(test_dataset, net, device, img_indexes):
+def predict(test_dataset, net, device, img_indexes=None):
+    """
+    Function used for prediction
+    Args:
+        test_dataset: Dataset instance
+        net: Netwrk instance
+        device: Selected device (CPU or GPU)
+        img_indexes: Desired sub-list of image indexes for prediction
+    """
+    if img_indexes is not None:
+        imgs = img_indexes
+    else:
+        imgs = list(range(len(test_dataset)))
+
     # Get prediction for specific indexes
-    for IMAGE_INDEX in img_indexes:
+    for IMAGE_INDEX in imgs:
         # Get test image
         test_image = torch.unsqueeze(torch.tensor(test_dataset.data[IMAGE_INDEX].transpose(2, 0, 1)), dim=0)
         test_image = test_image.to(device=device, dtype=torch.float32)

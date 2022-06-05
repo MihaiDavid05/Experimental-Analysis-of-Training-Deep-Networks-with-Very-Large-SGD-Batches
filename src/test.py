@@ -7,6 +7,13 @@ from utils.utils import setup
 
 
 def get_args():
+    """
+    Function used for parsing the command line arguments
+
+    Returns: Command line arguments
+
+    """
+
     parser = argparse.ArgumentParser()
     parser.add_argument('config_filename', type=str, help='Configuration filename that you want to use during the run.')
     parser.add_argument('model', type=str, help='Checkpoint name, under checkpoints folder, for the model weights.')
@@ -30,4 +37,5 @@ if __name__ == "__main__":
     test_dataset = build_dataset(config, config["data"])
 
     # Make predictions
-    predict(test_dataset, net, device, [0, 1])
+    image_indexes = list(range(10))
+    predict(test_dataset, net, device, image_indexes)
