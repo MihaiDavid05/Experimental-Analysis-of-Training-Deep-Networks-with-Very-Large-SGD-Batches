@@ -5,26 +5,27 @@ Bla bla bla
 
 ### Environment setup
 For our experiments we used Google Colab.
+
+However, we also made our own local environment (CPU only).
 Tested configurations: 
 * `Python 3.7`
-* `pytorch ???`
-* `torchvision ???`
-* `CUDA` according to Colab 
-* `cuDNN` according to Colab 
+* `pytorch 1.9.0` (CPU only)
+* `torchvision 0.10.0`
 
 ### 1.Libraries installation
 To install PyTorch (CPU only) use the following command:
 ```bash
 pip install pytorch torchvision torchaudio cpuonly -c pytorch
 ```
-For PyTorch and torchvision with CUDA installation use the following command:
+For PyTorch and torchvision with CUDA installation use the following command (NOT TESTED):
 ```bash
-conda install pytorch==1.1.0 torchvision==0.3.0 cudatoolkit=9.0 -c pytorch
+conda install pytorch torchvision cudatoolkit=<compatible_version> -c pytorch
 ```
+NOTE: Search for a compatible cudatoolkit version with your local GPU.
 
 Other necessary installations:
 ```bash
-pip install numpy tensorboard tqdm future pillow
+pip install numpy tensorboard tqdm pillow
 ```
 
 ### 2.Set PYTHONPATH
@@ -49,9 +50,10 @@ Unzip the contents under the `data` folder.
 ```
 
 ### 4.Tensorboard
-You may encouter an error with tensorboard. Install this:
+You may encouter an error with tensorboard, when working locally. Install this:
 ```bash
 pip install setuptools==59.5.0
+pip install tensorflow==2.9.1
 ```
 
 To run Tensorboard, run this:

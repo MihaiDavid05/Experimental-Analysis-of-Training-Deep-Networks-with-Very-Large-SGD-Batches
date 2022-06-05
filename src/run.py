@@ -3,7 +3,7 @@ from utils.network import build_network
 from utils.dataset import build_dataset
 from utils.train import train
 from utils.utils import setup
-# from torch.utils.tensorboard import SummaryWriter
+from torch.utils.tensorboard import SummaryWriter
 
 
 def get_args():
@@ -33,7 +33,5 @@ if __name__ == "__main__":
     net.to(device=device)
 
     # Train network
-    # TODO: check this writer
-    # writer = SummaryWriter(log_dir=config["log_dir"])
-    writer = None
+    writer = SummaryWriter(log_dir=config["log_dir"])
     train(dataset, net, config, writer,  device=device)

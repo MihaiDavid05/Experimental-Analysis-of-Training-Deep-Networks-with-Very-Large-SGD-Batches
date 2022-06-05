@@ -16,7 +16,6 @@ def get_args():
 
     parser = argparse.ArgumentParser()
     parser.add_argument('config_filename', type=str, help='Configuration filename that you want to use during the run.')
-    parser.add_argument('model', type=str, help='Checkpoint name, under checkpoints folder, for the model weights.')
     arguments = parser.parse_args()
     return arguments
 
@@ -30,7 +29,7 @@ if __name__ == "__main__":
     # Get network
     net = build_network(config)
     net.to(device=device)
-    model_path = config["checkpoint_dir"] + '/' + args.model + '.pth'
+    model_path = config["checkpoint_dir"] + '/' + 'bestmodel.pth'
     net.load_state_dict(torch.load(model_path, map_location=device))
 
     # Get an image
@@ -38,4 +37,5 @@ if __name__ == "__main__":
 
     # Make predictions
     image_indexes = list(range(10))
+    # image_indexes = None
     predict(test_dataset, net, device, image_indexes)

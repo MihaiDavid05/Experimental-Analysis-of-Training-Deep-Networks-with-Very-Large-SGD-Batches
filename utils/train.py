@@ -35,14 +35,13 @@ def train(dataset, net, config, writer, device='cpu'):
     if opt == "adam":
         optimizer = optim.Adam(net.parameters(), lr=lr, betas=(0.9, 0.999), eps=1e-08, amsgrad=False)
     elif opt == "sgd":
-        # TODO: Check this
-        optimizer = None
-        pass
+        # TODO: Check this SGD default params
+        optimizer = optim.SGD(net.parameters(), lr=lr, momentum=0, weight_decay=0, nesterov=False)
     else:
         raise KeyError("LR scheduler not properly set !")
+
     if use_lr_scheduler == 'ReduceOnPlateau':
-        scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, mode='min', patience=epochs/4, factor=0.5,
-                                                         verbose=True)
+        scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, mode='min', patience=epochs/4, factor=0.5, verbose=True)
     elif use_lr_scheduler != 0:
         raise KeyError("LR scheduler not properly set !")
     criterion = nn.CrossEntropyLoss()
@@ -68,7 +67,7 @@ def train(dataset, net, config, writer, device='cpu'):
             preds = net(images)
             # Compute loss
             loss = criterion(preds, targets)
-            # writer.add_scalar("Lr", optimizer.param_groups[0]['lr'], global_step)
+            writer.add_scalar("Lr", optimizer.param_groups[0]['lr'], global_step)
             # Perform backward pass
             loss.backward()
             optimizer.step()
@@ -106,8 +105,6 @@ def train(dataset, net, config, writer, device='cpu'):
                     n_correct += 1
                 else:
                     n_wrong += 1
-                # # Add image to tensorboard
-                # writer.add_image("Target0", targets[0].float().detach().cpu(), global_step)
 
         net.train()
         # Update validation loss
@@ -132,18 +129,18 @@ def train(dataset, net, config, writer, device='cpu'):
             scheduler.step(val_loss)
 
         # Add loss to tensorboard
-        # writer.add_scalars('Loss', {'train': epoch_loss, 'val': val_loss}, global_step)
+        writer.add_scalars('Loss', {'train': epoch_loss, 'val': val_loss}, global_step)
 
         # Save model if necessary
         if val_score > max_val_score:
             max_val_score = val_score
             print("Current maximum validation accuracy is: {}\n".format(max_val_score))
-            torch.save(net.state_dict(), checkpoint_dir + f"/bestmodel_{epoch}.pth")
+            torch.save(net.state_dict(), checkpoint_dir + f"/bestmodel.pth")
             print(f'Checkpoint {epoch} saved!\n')
 
         print('Validation accuracy is: {}\n'.format(val_score))
         # Add val accuracy to tensorboard
-        # writer.add_scalar("Accuracy/val", val_score, global_step)
+        writer.add_scalar("Accuracy/val", val_score, global_step)
 
 
 def predict(test_dataset, net, device, img_indexes=None):
@@ -160,8 +157,12 @@ def predict(test_dataset, net, device, img_indexes=None):
     else:
         imgs = list(range(len(test_dataset)))
 
+    # Initialize variables
+    n_correct = 0
+    n_wrong = 0
+
     # Get prediction for specific indexes
-    for IMAGE_INDEX in imgs:
+    for IMAGE_INDEX in tqdm(imgs):
         # Get test image
         test_image = torch.unsqueeze(torch.tensor(test_dataset.data[IMAGE_INDEX].transpose(2, 0, 1)), dim=0)
         test_image = test_image.to(device=device, dtype=torch.float32)
@@ -174,5 +175,19 @@ def predict(test_dataset, net, device, img_indexes=None):
         # Get prediction and target string class
         pred_class = torch.argmax(pred, dim=1).detach().cpu().numpy()[0]
         pred_string = test_dataset.classes[pred_class]
-        target_string = test_dataset.classes[test_dataset.targets[IMAGE_INDEX]]
-        print(f"Prediction for image {IMAGE_INDEX} is {pred_string} and target is {target_string}")
+        target_class = test_dataset.targets[IMAGE_INDEX]
+        target_string = test_dataset.classes[target_class]
+
+        # Compute test accuracy only if entire test set taken into consideration
+        if img_indexes is None:
+            if pred_class == target_class:
+                n_correct += 1
+            else:
+                n_wrong += 1
+        else:
+            print(f"Prediction for image {IMAGE_INDEX} is {pred_string} and target is {target_string}.")
+
+    # Get test set accuracy
+    if img_indexes is None:
+        accuracy = ((n_correct * 1.0) / (n_correct + n_wrong)) * 100
+        print(f"Test set accuracy is {accuracy}")
