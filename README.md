@@ -4,7 +4,7 @@
 Bla bla bla
 
 ### Environment setup
-For our experiments we used Google Colab.
+For our experiments we used Google Colab. We provide the notebook under `OML_notebook.ipynb`.
 
 However, we also made our own local environment (CPU only).
 Tested configurations: 
@@ -26,6 +26,12 @@ NOTE: Search for a compatible cudatoolkit version with your local GPU.
 Other necessary installations:
 ```bash
 pip install numpy tensorboard tqdm pillow
+```
+
+You may encouter an error with tensorboard at runtime, when working locally. Install this:
+```bash
+pip install setuptools==59.5.0
+pip install tensorflow==2.9.1
 ```
 
 ### 2.Set PYTHONPATH
@@ -50,25 +56,19 @@ Unzip the contents under the `data` folder.
 ```
 
 ### 4.Tensorboard
-You may encouter an error with tensorboard, when working locally. Install this:
-```bash
-pip install setuptools==59.5.0
-pip install tensorflow==2.9.1
-```
-
 To run Tensorboard, run this:
 ```bash
 python -m tensorboard.main --logdir=logs/<log_folder_wanted>
 ```
 
 ### 5.Training and validation
-Bla bla
+Bla bla!
 
 ### 6.Prediction
-Bla bla 
+Bla bla!
 
 ### 7. Results
-Bla bla
+Best in town!
 
 
 
