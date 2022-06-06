@@ -60,7 +60,7 @@ def tflog2pandas(path: str) -> pd.DataFrame:
     Returns: converted dataframe
 
     """
-    DEFAULT_SIZE_GUIDANCE = {
+    default_size_guidance = {
         "compressedHistograms": 1,
         "images": 1,
         "scalars": 0,  # 0 means load all
@@ -68,7 +68,7 @@ def tflog2pandas(path: str) -> pd.DataFrame:
     }
     runlog_data = pd.DataFrame({"metric": [], "value": [], "step": []})
     try:
-        event_acc = EventAccumulator(path, DEFAULT_SIZE_GUIDANCE)
+        event_acc = EventAccumulator(path, default_size_guidance)
         event_acc.Reload()
         tags = event_acc.Tags()["scalars"]
         for tag in tags:
@@ -111,11 +111,12 @@ def get_events_data(logdir_or_logfile: str, write_pkl: bool, write_csv: bool, ou
     or pickle-file including all (readable) runs of the logging directory.
 
     Args:
-        logdir_or_logfile:
-        write_pkl:
-        write_csv:
-        out_dir:
-        to_watch:
+        logdir_or_logfile: Path to a log directory or file
+        write_pkl: Whether to write to pickle or not
+        write_csv: Whether to write to csv or not
+        out_dir: Output directory for csv/pickle
+        to_watch: One of extensions: '_lr_acc' or '_loss_train' or '_loss_val'.
+        Adds extension to csv/pickle name, depending on the event file read
 
     """
     pp = pprint.PrettyPrinter(indent=4)
