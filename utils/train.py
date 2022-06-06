@@ -37,7 +37,6 @@ def train(dataset, net, config, writer, device='cpu'):
     if opt == "adam":
         optimizer = optim.Adam(net.parameters(), lr=lr, betas=(0.9, 0.999), eps=1e-08, amsgrad=False)
     elif opt == "sgd":
-        # https://github.com/geifmany/cifar-vgg/blob/master/cifar10vgg.py
         optimizer = optim.SGD(net.parameters(), lr=lr, momentum=0.9, weight_decay=0, nesterov=True)
     else:
         raise KeyError("Optimizer not properly set !")

@@ -2,6 +2,7 @@ from torchvision.models import vgg13, vgg13_bn
 import torch.nn as nn
 
 
+# REF: https://github.com/geifmany/cifar-vgg/blob/master/cifar10vgg.py
 class VGG16CIFAR(nn.Module):
     def __init__(self, n_classes):
         super(VGG16CIFAR, self).__init__()
