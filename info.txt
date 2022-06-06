@@ -109,6 +109,9 @@ controlling the width of the final minima found by SGD.
  - We demonstrate experimentally that a larger LR/BS correlates with a wider endpoint of SGD and better generalization.
  - There is a theoretical relationship between the expected loss value, the level of stochastic noise η/S in SGD, and the width of the
 minimum explored at this final stage of training
- -
+ - Demonstrating that the learning dynamics are approximately invariant under changes in learning rate or batch size that
+keep the ratio η/S constant.
+ - Higher values of η/S push the optimization towards flatter regions
+ - Smaller datasets more sensitive to LR/BS ratio.
 
 * https://fid3024.github.io/papers/2020%20-%20Don't%20Use%20Large%20Mini-Batches,%20Use%20Local%20SGD.pdf
