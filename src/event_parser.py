@@ -19,6 +19,8 @@ if __name__ == "__main__":
     args = get_args()
 
     log_path = f"logs/{args.log_config_name}"
-    get_events_data(log_path, False, True, log_path, to_watch='_lr_acc')
+    get_events_data(log_path, False, True, log_path, to_watch='_lr')
     get_events_data(log_path + "/Loss_train", False, True, log_path, to_watch='_loss_train')
     get_events_data(log_path + "/Loss_val", False, True, log_path, to_watch='_loss_val')
+    get_events_data(log_path + "/Accuracy_train", False, True, log_path, to_watch='_acc_train')
+    get_events_data(log_path + "/Accuracy_val", False, True, log_path, to_watch='_acc_val')

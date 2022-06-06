@@ -7,7 +7,7 @@ TO BE DONE!
 For our experiments we used Google Colab. We provide the notebook under `OML_notebook.ipynb`.
 
 However, we also made our own local environment (CPU only).
-Tested configurations: 
+Tested configurations locally: 
 * `Python 3.7`
 * `pytorch 1.9.0` (CPU only)
 * `torchvision 0.10.0`

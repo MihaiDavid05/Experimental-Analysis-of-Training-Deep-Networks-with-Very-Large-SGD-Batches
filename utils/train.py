@@ -25,18 +25,20 @@ def train(dataset, net, config, writer, device='cpu'):
     use_lr_scheduler = config["use_lr_scheduler"]
     opt = config["optimizer"]
     stop_early = config["early_stopping"]
+    stop_early_patience = config["early_stopping_patience"]
     scheduler = None
 
     # Create PyTorch DataLoaders
     train_images, val_images = random_split(dataset, [int(len(dataset) * 0.8), int(len(dataset) * 0.2)],
                                             generator=torch.Generator().manual_seed(42))
-    train_loader = DataLoader(train_images, shuffle=True, batch_size=batch_size)
-    val_loader = DataLoader(val_images, shuffle=False, batch_size=1, drop_last=True)
+    train_loader = DataLoader(train_images, shuffle=True, batch_size=batch_size, num_workers=1)
+    val_loader = DataLoader(val_images, shuffle=False, batch_size=1, drop_last=True, num_workers=1)
 
     # Define optimizer, lr scheduler and criterion
     if opt == "adam":
         optimizer = optim.Adam(net.parameters(), lr=lr, betas=(0.9, 0.999), eps=1e-08, amsgrad=False)
     elif opt == "sgd":
+        # TODO: update moemntum according to second paper
         optimizer = optim.SGD(net.parameters(), lr=lr, momentum=0.9, weight_decay=0, nesterov=True)
     else:
         raise KeyError("Optimizer not properly set !")
@@ -55,6 +57,8 @@ def train(dataset, net, config, writer, device='cpu'):
     max_val_score = 0
     best_val_loss = 10000
     patience = 0
+    correct_train = 0
+    wrong_train = 0
 
     # Train
     print("Training started !\n")
@@ -69,9 +73,14 @@ def train(dataset, net, config, writer, device='cpu'):
             # Forward pass
             optimizer.zero_grad()
             preds = net(images)
+            # Compute batch accuracy
+            pred_class = torch.argmax(preds, dim=1)
+            pred_bool_val = pred_class.eq(targets).int().detach().cpu().numpy()
+            correct_train += np.sum(pred_bool_val)
+            wrong_train += (len(images) - correct_train)
             # Compute loss
             loss = criterion(preds, targets)
-            writer.add_scalar("Lr", optimizer.param_groups[0]['lr'], global_step)
+            writer.add_scalar("Lr", optimizer.param_groups[0]['lr'], epoch)
             # Perform backward pass
             loss.backward()
             optimizer.step()
@@ -79,8 +88,13 @@ def train(dataset, net, config, writer, device='cpu'):
             global_step += 1
             epoch_loss += loss.item()
 
+        # Compute per epoch training loss
         epoch_loss = epoch_loss / len(train_loader)
         print(f'\nEpoch: {epoch} -> train_loss: {epoch_loss} \n')
+
+        # Compute training epoch accuracy
+        train_score = ((correct_train * 1.0) / (correct_train + wrong_train)) * 100
+        print(f'\nEpoch: {epoch} -> train_accuracy: {train_score} \n')
 
         # Evaluate model after each epoch
         print(f'Validation started !\n')
@@ -121,7 +135,7 @@ def train(dataset, net, config, writer, device='cpu'):
             else:
                 best_val_loss = val_loss
                 patience = 0
-            if patience == 12:
+            if patience == stop_early_patience:
                 print("Training stopped due to early stopping with patience {}.".format(patience))
                 break
 
@@ -137,7 +151,7 @@ def train(dataset, net, config, writer, device='cpu'):
                 scheduler.step()
 
         # Add loss to tensorboard
-        writer.add_scalars('Loss', {'train': epoch_loss, 'val': val_loss}, global_step)
+        writer.add_scalars('Loss', {'train': epoch_loss, 'val': val_loss}, epoch)
 
         # Save model if necessary
         if val_score > max_val_score:
@@ -146,9 +160,9 @@ def train(dataset, net, config, writer, device='cpu'):
             torch.save(net.state_dict(), checkpoint_dir + f"/bestmodel.pth")
             print(f'Checkpoint {epoch} saved!\n')
 
+        # Add train and val accuracy to tensorboard
         print('Validation accuracy is: {}\n'.format(val_score))
-        # Add val accuracy to tensorboard
-        writer.add_scalar("Accuracy/val", val_score, global_step)
+        writer.add_scalars('Accuracy', {'train': train_score, 'val': val_score}, epoch)
 
 
 def predict(test_dataset, net, device, img_indexes=None):

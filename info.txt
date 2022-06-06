@@ -3,51 +3,93 @@ Write what happened with each config here!
 config 1:
     For 250 epochs, batch_size 128 and init lr 0.1 it went smooth (I stopped it at 200).
     For 250 epochs, batch_size 2 and initial lr 0.1 got loss NaN !!!!
-    If the first config worked, then: minibatch_size = k * train_samples => k = 128 / 40000 = 0.0032 => new_lr = 0.1 * 0.0032 = 0.0003 (from stack link)
-    But, it stopped at epoch 14 due to early stopping (however it took waaay to long)
+    If the first config worked, then I applied: minibatch_size = k * train_samples => k = 128 / 40000 = 0.0032 => new_lr = 0.1 * 0.0032 = 0.0003 (from second paper)
+    But, it stopped due to early stopping (however it took waaay to long).
 
 
 
 Papers summary:
 
-* https://arxiv.org/pdf/1404.5997.pdf
+*** https://arxiv.org/pdf/1404.5997.pdf
 
- - Another factor affecting all of this is batch size. We can make data parallelism arbitrarily efficient if
+ - We can make data parallelism arbitrarily efficient if
 we are willing to increase the batch size (because the weight synchronization step is performed once per
 batch). But very big batch sizes adversely affect the rate at which SGD converges as well as the quality of
-the final solution. So here I target batch sizes in the hundreds or possibly thousands of examples.
-
+the final solution.
  - As we take the effective batch size, 128K, into the thousands, using a smaller
 batch size in the fully-connected layers leads to faster convergence to better minima.
-
  - The first question that I investigate is the accuracy cost of larger batch sizes. This is a somewhat
-complicated question because the answer is datasetdependent. Small, relatively homogeneous datasets
+complicated question because the answer is dataset-dependent. Small, relatively homogeneous datasets
 benefit from smaller batch sizes more so than large, heterogeneous, noisy datasets.
-
-- When experimenting with different batch sizes, one must decide how to adjust the hyperparameters
+ - When experimenting with different batch sizes, one must decide how to adjust the hyperparameters
 µ, ω, and epsilon. It seems plausible that the smoothing effects of momentum may be less necessary with bigger
 batch sizes, but in my experiments I used µ = 0.9
 for all batch sizes. Theory suggests that when multiplying the batch size by k, one should multiply the
 learning rate epsilon by √k to keep the variance in the gradient expectation constant.
-
-- Theory aside, for the batch sizes considered in this note, the heuristic that I found to work the
+ - Theory aside, for the batch sizes considered in this note, the heuristic that I found to work the
 best was to multiply the learning rate by k when multiplying the batch size by k. I can’t explain this
 discrepancy between theory and practice.
-
-- The main take-away is that there is an accuracy cost associated with bigger batch sizes, but it can be greatly reduced
+ - The main take-away is that there is an accuracy cost associated with bigger batch sizes, but it can be greatly reduced
 by using the variable batch size trick described in Section 4.2.
-
-- We can expect some loss of accuracy when training with bigger batch sizes. The magnitude of this loss
+ - We can expect some loss of accuracy when training with bigger batch sizes. The magnitude of this loss
 is dataset-dependent, and it is generally smaller for larger, more varied datasets
 
-* https://arxiv.org/pdf/1706.02677.pdf
 
+*** https://arxiv.org/pdf/1706.02677.pdf
+
+ - The per-worker workload must be large, which implies nontrivial growth in the SGD minibatch size.
+ - We show that on the ImageNet dataset large minibatches cause optimization difficulties, but when
+these are addressed the trained networksexhibit good generalization
+ - We show no loss of accuracy when training with large minibatch sizes up to 8192 images. We adopt a
+hyperparameter-free linear scaling rule for adjusting learning rates as a function of minibatch size and develop a new
+warmup scheme that overcomes optimization challenges early in training.
+ - With these simple techniques, our Caffe2-based system trains ResNet-50 with a minibatch size of 8192
+on 256 GPUs in one hour, while matching small minibatch accuracy
+ - Optimization difficulty is the main issue with large minibatches, rather than poor generalization (at least on ImageNet)
+ - !!!!! LINEAR SCALING RULE: When the minibatch size is multiplied by k, multiply the learning rate by k !!!!!!
+ - However, there are at least two cases when the condition ∇l(x, wt) ≈ ∇l(x, wt+j ) will clearly not hold.
+First, in initial training when the network is changing rapidly, it does not hold. We address this by using a warmup phase.
+ - Second, minibatch size cannot be scaled indefinitely: while results are stable for a large range of sizes,
+beyond a certain point accuracy degrades rapidly. Interestingly, this point is as large as ∼8k in ImageNet experiments.
+ -  Krizhevsky reported a 1% increase of error when increasing the minibatch size from 128 to 1024, whereas we show how to maintain
+accuracy across a much broader regime of minibatch sizes.
+ - Li [25] (§4.6) showed distributed ImageNet training with minibatches up to 5120 without a loss in accuracy after
+convergence. However, their work did not demonstrate a hyper-parameter search-free rule for adjusting the learning rate
+as a function of minibatch size, which is a central contribution of our work.
+ - Bottou et al suggest the learning rate should not exceed a maximum rate independent of minibatch size (which justifies warmup).
+ - Constant warmup: Uses a low constant learning rate for the first few epochs of training
+ - Gradual warmup: Gradually ramps up the learning rate from a small to a large value. This ramp avoids a sudden increase
+of the learning rate, allowing healthy convergence at the start of training. In practice, with a large minibatch of size kn,
+we start from a learning rate of η and increment it by a constant amount at each iteration such that it reaches
+ηˆ = kη after 5 epochs (results are robust to the exact duration of warmup). After the warmup, we go back to the original learning rate schedule.
+ - REMARK: Scaling the cross-entropy loss is not equivalent to scaling the learning rate.
+ - !!!!!!! We refer to the factor ηt+1/ηt as the momentum correction !!!!!!!
+ - REMARK: Apply momentum correction after changing learning rate if using
+ - REMARK: Use a single random shuffling of the training data (per epoch) that is divided amongst all k workers.
+ - Applying the linear scaling rule along with a warmup strategy allows us to seamlessly scale between small and large
+minibatches (up to 8k images) without tuning additional hyper-parameters or impacting accuracy.
+ - EXPERIMENTS: All models are trained for 90 epochs regardless of minibatch sizes. We apply the linear scaling rule from §2.1 and
+use a learning rate of η = 0.1 * kn/256 that is linear in the minibatch size kn. With k = 8 workers (GPUs) and n = 32
+samples per worker, η = 0.1 as in [16]. We call this number (0.1 * kn /256) the reference learning rate, and reduce it by
+1/10 at the 30-th, 60-th, and 80-th epoch, similar to [16].
+ - Our goal is to match errors across minibatch sizes by using a general strategy that avoids hyper-parameter tuning
+for each minibatch size.
+ - A constant warmup strategy actually degrades results.
+ - Our main result is that with gradual warmup, large minibatch training error matches the baseline training curve obtained
+with small minibatches.
+ - !!!!! The comparison between no warmup and gradual warmup suggests that large minibatch sizes are challenged by optimization
+difficulties in early training and if these difficulties are addressed, the training error and its curve can match a
+small minibatch baseline closely.
+ - !!!! If the optimization issues are addressed, there is no apparent generalization degradation observed using large minibatch training
+ - For all models we used the linear scaling rule and set the reference learning rate as η = 0.1 * kn/256. For models with kn > 256, we used
+the gradual warmup strategy always starting with η = 0.1 and increasing linearly to the reference learning rate after 5 epochs
+ - They showed that multiplying LR with sqrt(k) works poor in practice.
 
 
 * https://proceedings.neurips.cc/paper/2019/file/dc6a70712a252123c40d2adba6a11d84-Paper.pdf
 
-* https://openreview.net/attachment?id=B1eyO1BFPr&name=original_pdf
+-
 
 * https://www.pure.ed.ac.uk/ws/portalfiles/portal/75846467/width_of_minima_reached_by_stochastic_gradient_descent_is_influenced_by_learning_rate_to_batch_size_ratio.pdf
 
-* https://stackoverflow.com/questions/53033556/how-should-the-learning-rate-change-as-the-batch-size-change
+* https://openreview.net/attachment?id=B1eyO1BFPr&name=original_pdf
