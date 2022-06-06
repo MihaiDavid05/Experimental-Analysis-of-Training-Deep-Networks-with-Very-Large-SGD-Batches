@@ -4,7 +4,7 @@
   "log_dir": "logs",
   "model": "vgg16cifar",
   "dataset": "cifar10",
-  "batch_size": 1,
+  "batch_size": 2,
   "epochs": 250,
   "learning_rate": 0.1,
   "early_stopping": 0,

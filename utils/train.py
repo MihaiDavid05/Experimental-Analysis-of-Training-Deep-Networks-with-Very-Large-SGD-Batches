@@ -42,9 +42,10 @@ def train(dataset, net, config, writer, device='cpu'):
         raise KeyError("Optimizer not properly set !")
 
     if use_lr_scheduler == 'ReduceOnPlateau':
-        scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, mode='min', patience=epochs/4, factor=0.5)
+        scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, mode='min', patience=10, factor=0.5)
     elif use_lr_scheduler == 'Step':
         scheduler = optim.lr_scheduler.StepLR(optimizer, step_size=20, gamma=0.5)
+    # TODO: Add more schedulers
     elif use_lr_scheduler != 0:
         raise KeyError("LR scheduler not properly set !")
     criterion = nn.CrossEntropyLoss()
