@@ -38,7 +38,7 @@ def train(dataset, net, config, writer, device='cpu'):
     if opt == "adam":
         optimizer = optim.Adam(net.parameters(), lr=lr, betas=(0.9, 0.999), eps=1e-08, amsgrad=False)
     elif opt == "sgd":
-        # TODO: update moemntum according to second paper
+        # TODO: update moemntum according to second paper, maybe also use weight decay
         optimizer = optim.SGD(net.parameters(), lr=lr, momentum=0.9, weight_decay=0, nesterov=True)
     else:
         raise KeyError("Optimizer not properly set !")
@@ -77,7 +77,7 @@ def train(dataset, net, config, writer, device='cpu'):
             pred_class = torch.argmax(preds, dim=1)
             pred_bool_val = pred_class.eq(targets).int().detach().cpu().numpy()
             correct_train += np.sum(pred_bool_val)
-            wrong_train += (len(images) - correct_train)
+            wrong_train += (len(images) - np.sum(pred_bool_val))
             # Compute loss
             loss = criterion(preds, targets)
             writer.add_scalar("Lr", optimizer.param_groups[0]['lr'], epoch)
