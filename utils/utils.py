@@ -143,7 +143,7 @@ def get_events_data(logdir_or_logfile: str, write_pkl: bool, write_csv: bool, ou
             print("saving to csv file")
             out_file = os.path.join(out_dir, f"all_training_logs_in_one_file{to_watch}.csv")
             print(out_file)
-            all_logs.to_csv(out_file, index=None)
+            all_logs.to_csv(out_file, index=False)
         if write_pkl:
             print("saving to pickle file")
             out_file = os.path.join(out_dir, f"all_training_logs_in_one_file{to_watch}.pkl")
@@ -151,10 +151,3 @@ def get_events_data(logdir_or_logfile: str, write_pkl: bool, write_csv: bool, ou
             all_logs.to_pickle(out_file)
     else:
         print("No event paths have been found.")
-
-
-if __name__ == "__main__":
-    logdir_or_logfile = "logs/config2"
-    get_events_data(logdir_or_logfile, False, True, logdir_or_logfile, to_watch='_lr_acc')
-    get_events_data(logdir_or_logfile + "/Loss_train", False, True, logdir_or_logfile, to_watch='_loss_train')
-    get_events_data(logdir_or_logfile + "/Loss_val", False, True, logdir_or_logfile, to_watch='_loss_val')
