@@ -13,7 +13,8 @@ def build_dataset(config, data_dir, train=False):
     Returns: Dataset instance
 
     """
-    # TODO: Normalize data, maybe
+    # TODO: Maybe - Normalize data instead of scaling + add more augmentations
+    # ToTensor scales to [0, 1]
     t = transforms.Compose([transforms.ToTensor()])
     if config["dataset"] == 'cifar10':
         if config["augmentations"] != 0 and train:
