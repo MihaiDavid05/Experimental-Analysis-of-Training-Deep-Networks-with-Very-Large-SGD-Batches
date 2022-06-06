@@ -4,6 +4,7 @@ from torch import optim
 import torch.nn as nn
 from tqdm import tqdm
 from torch.utils.data import random_split
+import numpy as np
 
 
 def train(dataset, net, config, writer, device='cpu'):
@@ -157,32 +158,37 @@ def predict(test_dataset, net, device, img_indexes=None):
         test_dataset: Dataset instance
         net: Netwrk instance
         device: Selected device (CPU or GPU)
-        img_indexes: Desired sub-list of image indexes for prediction
+        img_indexes: Desired sub-list of image indexes for prediction, or None for entire test set
     """
+    # Get images for prediction
     if img_indexes is not None:
         imgs = img_indexes
     else:
         imgs = list(range(len(test_dataset)))
 
+    test_dataset.data = test_dataset.data[imgs]
+    test_dataset.targets = np.array(test_dataset.targets)[imgs]
+
+    # Define test data loader
+    test_loader = DataLoader(test_dataset, shuffle=False, batch_size=1)
+
     # Initialize variables
     n_correct = 0
     n_wrong = 0
 
-    # Get prediction for specific indexes
-    for IMAGE_INDEX in tqdm(imgs):
+    net.eval()
+    for index, batch in tqdm(enumerate(test_loader)):
         # Get test image
-        test_image = torch.unsqueeze(torch.tensor(test_dataset.data[IMAGE_INDEX].transpose(2, 0, 1)), dim=0)
-        test_image = test_image.to(device=device, dtype=torch.float32)
+        test_image = batch[0].to(device=device, dtype=torch.float32)
 
         # Make prediction
-        net.eval()
         with torch.no_grad():
             pred = net(test_image)
 
         # Get prediction and target string class
         pred_class = torch.argmax(pred, dim=1).detach().cpu().numpy()[0]
         pred_string = test_dataset.classes[pred_class]
-        target_class = test_dataset.targets[IMAGE_INDEX]
+        target_class = test_dataset.targets[index]
         target_string = test_dataset.classes[target_class]
 
         # Compute test accuracy only if entire test set taken into consideration
@@ -192,7 +198,7 @@ def predict(test_dataset, net, device, img_indexes=None):
             else:
                 n_wrong += 1
         else:
-            print(f"Prediction for image {IMAGE_INDEX} is {pred_string} and target is {target_string}.")
+            print(f"Prediction for image {index} is {pred_string} and target is {target_string}.")
 
     # Get test set accuracy
     if img_indexes is None:

@@ -33,9 +33,9 @@ if __name__ == "__main__":
     net.load_state_dict(torch.load(model_path, map_location=device))
 
     # Get an image
-    test_dataset = build_dataset(config, config["data"], train=True)
+    test_dataset = build_dataset(config, config["data"])
 
     # Make predictions
-    image_indexes = list(range(50))
-    # image_indexes = None
+    # image_indexes = list(range(50))
+    image_indexes = None
     predict(test_dataset, net, device, image_indexes)
