@@ -23,6 +23,7 @@ def train(dataset, net, config, writer, device='cpu'):
     lr = config["learning_rate"]
     use_lr_scheduler = config["use_lr_scheduler"]
     opt = config["optimizer"]
+    stop_early = config["early_stopping"]
     scheduler = None
 
     # Create PyTorch DataLoaders
@@ -35,14 +36,15 @@ def train(dataset, net, config, writer, device='cpu'):
     if opt == "adam":
         optimizer = optim.Adam(net.parameters(), lr=lr, betas=(0.9, 0.999), eps=1e-08, amsgrad=False)
     elif opt == "sgd":
-        # TODO: Check this SGD default params and network also
         # https://github.com/geifmany/cifar-vgg/blob/master/cifar10vgg.py
         optimizer = optim.SGD(net.parameters(), lr=lr, momentum=0.9, weight_decay=0, nesterov=True)
     else:
-        raise KeyError("LR scheduler not properly set !")
+        raise KeyError("Optimizer not properly set !")
 
     if use_lr_scheduler == 'ReduceOnPlateau':
-        scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, mode='min', patience=epochs/4, factor=0.5, verbose=True)
+        scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, mode='min', patience=epochs/4, factor=0.5)
+    elif use_lr_scheduler == 'Step':
+        scheduler = optim.lr_scheduler.StepLR(optimizer, step_size=20, gamma=0.5)
     elif use_lr_scheduler != 0:
         raise KeyError("LR scheduler not properly set !")
     criterion = nn.CrossEntropyLoss()
@@ -112,14 +114,15 @@ def train(dataset, net, config, writer, device='cpu'):
         val_loss = val_loss / len(val_loader)
 
         # Implement early stopping
-        if val_loss > best_val_loss:
-            patience += 1
-        else:
-            best_val_loss = val_loss
-            patience = 0
-        if patience == epochs // 2:
-            print("Training stopped due to early stopping with patience {}.".format(patience))
-            break
+        if stop_early != 0:
+            if val_loss > best_val_loss:
+                patience += 1
+            else:
+                best_val_loss = val_loss
+                patience = 0
+            if patience == epochs // 2:
+                print("Training stopped due to early stopping with patience {}.".format(patience))
+                break
 
         print(f'\nEpoch: {epoch} -> val_loss: {val_loss}\n')
         # Compute overall validation score
@@ -127,7 +130,10 @@ def train(dataset, net, config, writer, device='cpu'):
 
         # Update learning rate accordingly
         if scheduler is not None:
-            scheduler.step(val_loss)
+            if use_lr_scheduler == 'ReduceOnPlateau':
+                scheduler.step(val_loss)
+            else:
+                scheduler.step()
 
         # Add loss to tensorboard
         writer.add_scalars('Loss', {'train': epoch_loss, 'val': val_loss}, global_step)

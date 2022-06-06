@@ -44,3 +44,19 @@ def setup(args):
     print('Device state: ', device)
 
     return config, device, log_dir, checkpoints_dir
+
+
+def normalize_production(x):
+    """
+    This function is used to normalize instances in production according to saved training set statistics
+    Args:
+        x: Training sample
+
+    Returns: Normalized sample
+
+    """
+
+    # these values produced during first training and are general for the standard cifar10 training set normalization
+    mean = 120.707
+    std = 64.15
+    return (x - mean) / (std + 1e-7)

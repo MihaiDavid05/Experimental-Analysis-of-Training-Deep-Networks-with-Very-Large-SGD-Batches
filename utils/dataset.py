@@ -13,6 +13,7 @@ def build_dataset(config, data_dir, train=False):
     Returns: Dataset instance
 
     """
+    # TODO: Normalize data for vgg16cifar
     t = transforms.Compose([transforms.ToTensor()])
     if config["dataset"] == 'cifar10':
         if config["augmentations"] != 0 and train:
