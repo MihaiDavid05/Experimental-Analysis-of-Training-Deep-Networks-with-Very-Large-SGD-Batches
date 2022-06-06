@@ -110,7 +110,6 @@ def train(dataset, net, config, writer, device='cpu'):
             # Get image and target
             images = batch[0].to(device=device, dtype=torch.float32)
             targets = batch[1].to(device=device, dtype=torch.long)
-
             with torch.no_grad():
                 # Forward pass
                 preds = net(images)

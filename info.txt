@@ -6,6 +6,8 @@ config 1:
     If the first config worked, then I applied: minibatch_size = k * train_samples => k = 128 / 40000 = 0.0032 => new_lr = 0.1 * 0.0032 = 0.0003 (from second paper)
     But, it stopped due to early stopping (however it took waaay to long).
 
+config2:
+    ?
 
 
 Papers summary:
@@ -88,8 +90,25 @@ the gradual warmup strategy always starting with η = 0.1 and increasing linearl
 
 * https://proceedings.neurips.cc/paper/2019/file/dc6a70712a252123c40d2adba6a11d84-Paper.pdf
 
--
+ - Empirical evidence of a training strategy that we should control the ratio of batch size to learning rate not too
+large to achieve a good generalization ability
+ - !!!!! We only consider the case that the batch size and learning rate are constant !!!!
+ - Batch size and learning rate, adjust the fluctuation of gradient
+ - [30] proves that for linear neural networks, batch size has an optimal value when the learning rate is fixed
+ - [29] suggests that increasing the batch size during the training of neural networks can receive the same result
+of decaying the learning rate when the rate of batch size to learning rate remains the same. This result is consistent with ours.
+
 
 * https://www.pure.ed.ac.uk/ws/portalfiles/portal/75846467/width_of_minima_reached_by_stochastic_gradient_descent_is_influenced_by_learning_rate_to_batch_size_ratio.pdf
 
-* https://openreview.net/attachment?id=B1eyO1BFPr&name=original_pdf
+ - We show that the dynamics and convergence properties of SGD are set by the ratio of learning rate to batch size
+ - We observe that this ratio is a key determinant of the generalization error, which we suggest is mediated by
+controlling the width of the final minima found by SGD.
+ - SGD performs similarly for different batch sizes but a constant LR/BS
+ - We derive a relation between LR/BS and the width of the minimum found by SGD
+ - We demonstrate experimentally that a larger LR/BS correlates with a wider endpoint of SGD and better generalization.
+ - There is a theoretical relationship between the expected loss value, the level of stochastic noise η/S in SGD, and the width of the
+minimum explored at this final stage of training
+ -
+
+* https://fid3024.github.io/papers/2020%20-%20Don't%20Use%20Large%20Mini-Batches,%20Use%20Local%20SGD.pdf
