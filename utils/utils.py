@@ -1,6 +1,10 @@
-import os
 import json
 import torch
+import glob
+import os
+import pprint
+import pandas as pd
+from tensorboard.backend.event_processing.event_accumulator import EventAccumulator
 
 
 def setup(args):
@@ -46,26 +50,111 @@ def setup(args):
     return config, device, log_dir, checkpoints_dir
 
 
-def normalize(x, cfg):
+# REF: https://github.com/theRealSuperMario/supermariopy/blob/master/scripts/tflogs2pandas.py
+def tflog2pandas(path: str) -> pd.DataFrame:
     """
-    This function is used to normalize instances in production according to saved training set statistics
+    Convert single tensorflow log file to pandas DataFrame
     Args:
-        x: Training sample
-        cfg: Configuration dictionary
+        path: path to tensorflow log file
 
-    Returns: Normalized sample
+    Returns: converted dataframe
 
     """
+    DEFAULT_SIZE_GUIDANCE = {
+        "compressedHistograms": 1,
+        "images": 1,
+        "scalars": 0,  # 0 means load all
+        "histograms": 1,
+    }
+    runlog_data = pd.DataFrame({"metric": [], "value": [], "step": []})
+    try:
+        event_acc = EventAccumulator(path, DEFAULT_SIZE_GUIDANCE)
+        event_acc.Reload()
+        tags = event_acc.Tags()["scalars"]
+        for tag in tags:
+            event_list = event_acc.Scalars(tag)
+            values = list(map(lambda x: x.value, event_list))
+            step = list(map(lambda x: x.step, event_list))
+            r = {"metric": [tag] * len(step), "value": values, "step": step}
+            r = pd.DataFrame(r)
+            runlog_data = pd.concat([runlog_data, r])
+    # Dirty catch of DataLossError
+    except Exception:
+        print("Event file possibly corrupt: {}".format(path))
+    return runlog_data
 
-    # these values produced during first training and are general for the standard cifar10 training set normalization
 
-    if cfg["dataset"] == "cifar10":
-        # https://github.com/geifmany/cifar-vgg/blob/master/cifar10vgg.py
-        mean = 120.707
-        std = 64.15
+def many_logs2pandas(event_paths):
+    """
+    Convert multiple tensorflow log file to pandas DataFrame
+    Args:
+        event_paths: path to tensorflow log directory
+
+    Returns: converted dataframe
+
+    """
+    all_logs = pd.DataFrame()
+    for path in event_paths:
+        log = tflog2pandas(path)
+        if log is not None:
+            if all_logs.shape[0] == 0:
+                all_logs = log
+            else:
+                all_logs = all_logs.append(log, ignore_index=True)
+    return all_logs
+
+
+def get_events_data(logdir_or_logfile: str, write_pkl: bool, write_csv: bool, out_dir: str, to_watch: str):
+    """
+    This script exctracts variables from all logs from tensorflow event
+    files ("event*"), writes them to Pandas and finally stores them a csv-file
+    or pickle-file including all (readable) runs of the logging directory.
+
+    Args:
+        logdir_or_logfile:
+        write_pkl:
+        write_csv:
+        out_dir:
+        to_watch:
+
+    """
+    pp = pprint.PrettyPrinter(indent=4)
+    if os.path.isdir(logdir_or_logfile):
+        # Get all event* runs from logging_dir subdirectories
+        event_paths = glob.glob(os.path.join(logdir_or_logfile, "event*"))
+    elif os.path.isfile(logdir_or_logfile):
+        event_paths = [logdir_or_logfile]
     else:
-        # https://github.com/geifmany/cifar-vgg/blob/master/cifar100vgg.py
-        mean = 121.936
-        std = 68.389
+        raise ValueError(
+            "input argument {} has to be a file or a directory".format(
+                logdir_or_logfile
+            )
+        )
+    # Call & append
+    if event_paths:
+        pp.pprint("Found tensorflow logs to process:")
+        pp.pprint(event_paths)
+        all_logs = many_logs2pandas(event_paths)
+        pp.pprint("Head of created dataframe")
+        pp.pprint(all_logs.head())
 
-    return (x - mean) / (std + 1e-7)
+        os.makedirs(out_dir, exist_ok=True)
+        if write_csv:
+            print("saving to csv file")
+            out_file = os.path.join(out_dir, f"all_training_logs_in_one_file{to_watch}.csv")
+            print(out_file)
+            all_logs.to_csv(out_file, index=None)
+        if write_pkl:
+            print("saving to pickle file")
+            out_file = os.path.join(out_dir, f"all_training_logs_in_one_file{to_watch}.pkl")
+            print(out_file)
+            all_logs.to_pickle(out_file)
+    else:
+        print("No event paths have been found.")
+
+
+if __name__ == "__main__":
+    logdir_or_logfile = "logs/config2"
+    get_events_data(logdir_or_logfile, False, True, logdir_or_logfile, to_watch='_lr_acc')
+    get_events_data(logdir_or_logfile + "/Loss_train", False, True, logdir_or_logfile, to_watch='_loss_train')
+    get_events_data(logdir_or_logfile + "/Loss_val", False, True, logdir_or_logfile, to_watch='_loss_val')

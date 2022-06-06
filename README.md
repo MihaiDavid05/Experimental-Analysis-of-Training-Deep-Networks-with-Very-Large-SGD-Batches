@@ -25,7 +25,7 @@ NOTE: Search for a compatible cudatoolkit version with your local GPU.
 
 Other necessary installations:
 ```bash
-pip install numpy tensorboard tqdm pillow
+pip install numpy tensorboard tqdm pillow pandas
 ```
 
 You may encouter an error with tensorboard at runtime, when working locally. Install this:
