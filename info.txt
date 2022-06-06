@@ -1,0 +1,17 @@
+Write what happened here!
+
+config 1:
+    For batch_size 2 and initial lr 0.1 got loss NaN.
+    For batch_size 128 and init lr 0.1 it went smooth.
+    If the second thing worked, then minibatch_size = k * train_samples => k = 128 / 40000 = 0.0032 => new_lr = 0.1 * 0.0032 = 0.0003 (from stack link)
+
+
+Maybe read these:
+
+https://arxiv.org/pdf/1404.5997.pdf
+https://arxiv.org/pdf/1706.02677.pdf
+https://proceedings.neurips.cc/paper/2019/file/dc6a70712a252123c40d2adba6a11d84-Paper.pdf
+https://openreview.net/attachment?id=B1eyO1BFPr&name=original_pdf
+https://www.pure.ed.ac.uk/ws/portalfiles/portal/75846467/width_of_minima_reached_by_stochastic_gradient_descent_is_influenced_by_learning_rate_to_batch_size_ratio.pdf
+
+https://stackoverflow.com/questions/53033556/how-should-the-learning-rate-change-as-the-batch-size-change
