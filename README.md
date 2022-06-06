@@ -1,7 +1,7 @@
 # EPFL OML Project
 
 ### Abstract
-Bla bla bla
+TO BE DONE!
 
 ### Environment setup
 For our experiments we used Google Colab. We provide the notebook under `OML_notebook.ipynb`.
@@ -41,7 +41,7 @@ export PYTHONPATH=$PYTHONPATH:<path_to_project_folder>
 ```
 
 ### 3.Data and folder structure
-Please download python version of CIFAR10 and CIFAR100 at this [link](https://www.cs.toronto.edu/~kriz/cifar.html).
+Please download the python version of CIFAR10 and CIFAR100 at this [link](https://www.cs.toronto.edu/~kriz/cifar.html).
 Unzip the contents under the `data` folder.
 ```
 └── PROJECT_ROOT
@@ -51,8 +51,8 @@ Unzip the contents under the `data` folder.
        ├── checkpoints          <- models weights    
        ├── configs              <- configuration files
        ├── logs                 <- experiments log files
-       ├── src                  <- train, predict and data augmentation scripts
-       └── utils                <- multiple utility scripts grouped by functionality
+       ├── src                  <- train, predict and event parser scripts
+       └── utils                <- multiple utility scripts
 ```
 
 ### 4.Tensorboard
@@ -62,13 +62,31 @@ python -m tensorboard.main --logdir=logs/<log_folder_wanted>
 ```
 
 ### 5.Training and validation
-Bla bla!
+For training and validation you can run this command:
+```shell script
+cd src
+python run.py <config_filename>
+```
+Example:
+```shell script
+cd src
+python run.py "config2"
+```
 
 ### 6.Prediction
-Bla bla!
+For prediction on test set you can run this command:
+```shell script
+cd src
+python test.py <config_filename>
+```
+Example:
+```shell script
+cd src
+python test.py "config2"
+```
 
 ### 7. Results
-Best in town!
+TO BE DONE!
 
 
 
