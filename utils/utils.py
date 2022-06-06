@@ -46,17 +46,26 @@ def setup(args):
     return config, device, log_dir, checkpoints_dir
 
 
-def normalize_production(x):
+def normalize(x, cfg):
     """
     This function is used to normalize instances in production according to saved training set statistics
     Args:
         x: Training sample
+        cfg: Configuration dictionary
 
     Returns: Normalized sample
 
     """
 
     # these values produced during first training and are general for the standard cifar10 training set normalization
-    mean = 120.707
-    std = 64.15
+
+    if cfg["dataset"] == "cifar10":
+        # https://github.com/geifmany/cifar-vgg/blob/master/cifar10vgg.py
+        mean = 120.707
+        std = 64.15
+    else:
+        # https://github.com/geifmany/cifar-vgg/blob/master/cifar100vgg.py
+        mean = 121.936
+        std = 68.389
+
     return (x - mean) / (std + 1e-7)
