@@ -1,17 +1,53 @@
-Write what happened here!
+Write what happened with each config here!
 
 config 1:
-    For batch_size 2 and initial lr 0.1 got loss NaN.
-    For batch_size 128 and init lr 0.1 it went smooth.
-    If the second thing worked, then minibatch_size = k * train_samples => k = 128 / 40000 = 0.0032 => new_lr = 0.1 * 0.0032 = 0.0003 (from stack link)
+    For 250 epochs, batch_size 128 and init lr 0.1 it went smooth (I stopped it at 200).
+    For 250 epochs, batch_size 2 and initial lr 0.1 got loss NaN !!!!
+    If the first config worked, then: minibatch_size = k * train_samples => k = 128 / 40000 = 0.0032 => new_lr = 0.1 * 0.0032 = 0.0003 (from stack link)
+    But, it stopped at epoch 14 due to early stopping (however it took waaay to long)
 
 
-Maybe read these:
 
-https://arxiv.org/pdf/1404.5997.pdf
-https://arxiv.org/pdf/1706.02677.pdf
-https://proceedings.neurips.cc/paper/2019/file/dc6a70712a252123c40d2adba6a11d84-Paper.pdf
-https://openreview.net/attachment?id=B1eyO1BFPr&name=original_pdf
-https://www.pure.ed.ac.uk/ws/portalfiles/portal/75846467/width_of_minima_reached_by_stochastic_gradient_descent_is_influenced_by_learning_rate_to_batch_size_ratio.pdf
+Papers summary:
 
-https://stackoverflow.com/questions/53033556/how-should-the-learning-rate-change-as-the-batch-size-change
+* https://arxiv.org/pdf/1404.5997.pdf
+
+ - Another factor affecting all of this is batch size. We can make data parallelism arbitrarily efficient if
+we are willing to increase the batch size (because the weight synchronization step is performed once per
+batch). But very big batch sizes adversely affect the rate at which SGD converges as well as the quality of
+the final solution. So here I target batch sizes in the hundreds or possibly thousands of examples.
+
+ - As we take the effective batch size, 128K, into the thousands, using a smaller
+batch size in the fully-connected layers leads to faster convergence to better minima.
+
+ - The first question that I investigate is the accuracy cost of larger batch sizes. This is a somewhat
+complicated question because the answer is datasetdependent. Small, relatively homogeneous datasets
+benefit from smaller batch sizes more so than large, heterogeneous, noisy datasets.
+
+- When experimenting with different batch sizes, one must decide how to adjust the hyperparameters
+µ, ω, and epsilon. It seems plausible that the smoothing effects of momentum may be less necessary with bigger
+batch sizes, but in my experiments I used µ = 0.9
+for all batch sizes. Theory suggests that when multiplying the batch size by k, one should multiply the
+learning rate epsilon by √k to keep the variance in the gradient expectation constant.
+
+- Theory aside, for the batch sizes considered in this note, the heuristic that I found to work the
+best was to multiply the learning rate by k when multiplying the batch size by k. I can’t explain this
+discrepancy between theory and practice.
+
+- The main take-away is that there is an accuracy cost associated with bigger batch sizes, but it can be greatly reduced
+by using the variable batch size trick described in Section 4.2.
+
+- We can expect some loss of accuracy when training with bigger batch sizes. The magnitude of this loss
+is dataset-dependent, and it is generally smaller for larger, more varied datasets
+
+* https://arxiv.org/pdf/1706.02677.pdf
+
+
+
+* https://proceedings.neurips.cc/paper/2019/file/dc6a70712a252123c40d2adba6a11d84-Paper.pdf
+
+* https://openreview.net/attachment?id=B1eyO1BFPr&name=original_pdf
+
+* https://www.pure.ed.ac.uk/ws/portalfiles/portal/75846467/width_of_minima_reached_by_stochastic_gradient_descent_is_influenced_by_learning_rate_to_batch_size_ratio.pdf
+
+* https://stackoverflow.com/questions/53033556/how-should-the-learning-rate-change-as-the-batch-size-change
