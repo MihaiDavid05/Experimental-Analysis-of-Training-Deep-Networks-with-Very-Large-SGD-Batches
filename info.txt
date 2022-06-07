@@ -67,7 +67,7 @@ we start from a learning rate of η and increment it by a constant amount at eac
 ηˆ = kη after 5 epochs (results are robust to the exact duration of warmup). After the warmup, we go back to the original learning rate schedule.
  - REMARK: Scaling the cross-entropy loss is not equivalent to scaling the learning rate.
  - !!!!!!! We refer to the factor ηt+1/ηt as the momentum correction !!!!!!!
- - REMARK: Apply momentum correction after changing learning rate if using
+ - REMARK: Apply momentum correction after changing learning rate.
  - REMARK: Use a single random shuffling of the training data (per epoch) that is divided amongst all k workers.
  - Applying the linear scaling rule along with a warmup strategy allows us to seamlessly scale between small and large
 minibatches (up to 8k images) without tuning additional hyper-parameters or impacting accuracy.

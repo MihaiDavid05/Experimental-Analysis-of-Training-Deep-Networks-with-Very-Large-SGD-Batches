@@ -5,6 +5,7 @@ import torch.nn as nn
 from tqdm import tqdm
 from torch.utils.data import random_split
 import numpy as np
+import time
 
 
 def train(dataset, net, config, writer, device='cpu'):
@@ -32,7 +33,7 @@ def train(dataset, net, config, writer, device='cpu'):
     train_images, val_images = random_split(dataset, [int(len(dataset) * 0.8), int(len(dataset) * 0.2)],
                                             generator=torch.Generator().manual_seed(42))
     train_loader = DataLoader(train_images, shuffle=True, batch_size=batch_size, num_workers=1)
-    val_loader = DataLoader(val_images, shuffle=False, batch_size=1, drop_last=True, num_workers=1)
+    val_loader = DataLoader(val_images, shuffle=False, batch_size=100, drop_last=True, num_workers=1)
 
     # Define optimizer, lr scheduler and criterion
     if opt == "adam":
@@ -59,13 +60,15 @@ def train(dataset, net, config, writer, device='cpu'):
     patience = 0
     correct_train = 0
     wrong_train = 0
-
+    total_epoch_time = 0
     # Train
     print("Training started !\n")
     for epoch in range(epochs):
         # Train step
         net.train()
         epoch_loss = 0
+        start = time.time()
+
         for batch in tqdm(train_loader):
             # Get image and target
             images = batch[0].to(device=device, dtype=torch.float32)
@@ -87,6 +90,7 @@ def train(dataset, net, config, writer, device='cpu'):
             # Update global step value and epoch loss
             global_step += 1
             epoch_loss += loss.item()
+            break
 
         # Compute per epoch training loss
         epoch_loss = epoch_loss / len(train_loader)
@@ -95,6 +99,11 @@ def train(dataset, net, config, writer, device='cpu'):
         # Compute training epoch accuracy
         train_score = ((correct_train * 1.0) / (correct_train + wrong_train)) * 100
         print(f'\nEpoch: {epoch} -> train_accuracy: {train_score} \n')
+
+        # Compute the time taken for each epoch
+        end = time.time()
+        epoch_time = end - start
+        total_epoch_time += epoch_time
 
         # Evaluate model after each epoch
         print(f'Validation started !\n')
@@ -118,10 +127,9 @@ def train(dataset, net, config, writer, device='cpu'):
                 val_loss += loss.item()
                 # Compute accuracy
                 pred_class = torch.argmax(preds, dim=1)
-                if pred_class == targets:
-                    n_correct += 1
-                else:
-                    n_wrong += 1
+                pred_bool_val = pred_class.eq(targets).int().detach().cpu().numpy()
+                n_correct += np.sum(pred_bool_val)
+                n_wrong += (len(images) - np.sum(pred_bool_val))
 
         net.train()
         # Update validation loss
@@ -162,6 +170,9 @@ def train(dataset, net, config, writer, device='cpu'):
         # Add train and val accuracy to tensorboard
         print('Validation accuracy is: {}\n'.format(val_score))
         writer.add_scalars('Accuracy', {'train': train_score, 'val': val_score}, epoch)
+
+    average_epoch_time = total_epoch_time / epochs
+    writer.add_scalar("Average_time/epoch", average_epoch_time, 0)
 
 
 def predict(test_dataset, net, device, img_indexes=None):
