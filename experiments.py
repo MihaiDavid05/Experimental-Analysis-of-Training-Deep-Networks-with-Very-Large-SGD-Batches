@@ -23,6 +23,8 @@ if not os.path.exists("logs/" + experiment_path):
     os.mkdir("logs/" + experiment_path)
 if not os.path.exists("checkpoints/"):
     os.mkdir("checkpoints/")
+if not os.path.exists("checkpoints/" + experiment_path):
+    os.mkdir("checkpoints/" + experiment_path)
 
 
 config_path = 'configs/' + experiment_path
@@ -36,12 +38,12 @@ for config_filename in os.listdir(config_path):
         config["name"] = config_filename
 
         # Set folder for logging
-        log_dir = config["log_dir"] + '/' + config["name"]
+        log_dir = config["log_dir"] + '/' + experiment_path + '/' + config["name"]
         if not os.path.exists(log_dir):
             os.mkdir(log_dir)
 
         # Set folder for checkpoints
-        checkpoints_dir = config["checkpoint_dir"] + '/' + config["name"]
+        checkpoints_dir = config["checkpoint_dir"] + '/' + experiment_path + '/' + config["name"]
         if not os.path.exists(checkpoints_dir):
             os.mkdir(checkpoints_dir)
 
