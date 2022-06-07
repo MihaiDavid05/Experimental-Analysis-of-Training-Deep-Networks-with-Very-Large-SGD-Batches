@@ -1,0 +1,16 @@
+{
+  "name": "",
+  "data": "data",
+  "log_dir": "logs",
+  "model": "vgg13",
+  "dataset": "cifar10",
+  "batch_size": 2048,
+  "epochs": 300,
+  "learning_rate": 0.64,
+  "early_stopping": 1,
+  "early_stopping_patience": 12,
+  "use_lr_scheduler": 0,
+  "optimizer": "sgd",
+  "checkpoint_dir": "checkpoints",
+  "augmentations": 1
+}
