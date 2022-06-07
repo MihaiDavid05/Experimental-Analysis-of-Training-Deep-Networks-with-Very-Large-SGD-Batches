@@ -7,7 +7,8 @@ config 1:
     But, it stopped due to early stopping (however it took waaay to long).
 
 config2:
-    ?
+    Test accuracy around 79,5 %. But training could have gone longer. Also, a bit underfit, maybe too strong regularization.
+    Try other network and training schedule.
 
 
 Papers summary:
