@@ -19,8 +19,11 @@ if not os.path.exists("configs/"):
     os.mkdir("configs/")
 if not os.path.exists("logs/"):
     os.mkdir("logs/")
+if not os.path.exists("logs/" + experiment_path):
+    os.mkdir("logs/" + experiment_path)
 if not os.path.exists("checkpoints/"):
     os.mkdir("checkpoints/")
+
 
 config_path = 'configs/' + experiment_path
 
