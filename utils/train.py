@@ -90,7 +90,6 @@ def train(dataset, net, config, writer, device='cpu'):
             # Update global step value and epoch loss
             global_step += 1
             epoch_loss += loss.item()
-            break
 
         # Compute per epoch training loss
         epoch_loss = epoch_loss / len(train_loader)
