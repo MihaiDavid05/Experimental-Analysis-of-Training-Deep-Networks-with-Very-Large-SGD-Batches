@@ -7,12 +7,24 @@ from utils.dataset import build_dataset
 from utils.train import train
 from utils.utils import setup
 from torch.utils.tensorboard import SummaryWriter
-import argparse
 from utils.utils import get_events_data
 
 
-# CHANGE ONLY THIS PARAMETER
-experiment_path = "experiment1"
+def get_args():
+    """
+    Function used for parsing the command line arguments
+    Returns: Command line arguments
+    """
+    parser = argparse.ArgumentParser()
+    parser.add_argument('experiment_id', type=str, help='ID of the experiment that you want to run.')
+    arguments = parser.parse_args()
+
+    return arguments
+
+
+args = get_args()
+
+experiment_path = f"experiment{args.experiment_id}"
 
 # Create configs, logs and checkpoints folder
 if not os.path.exists("configs/"):
