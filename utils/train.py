@@ -48,6 +48,8 @@ def train(dataset, net, config, writer, device='cpu'):
         scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, mode='min', patience=10, factor=0.5)
     elif use_lr_scheduler == 'Step':
         scheduler = optim.lr_scheduler.StepLR(optimizer, step_size=20, gamma=0.5)
+    elif use_lr_scheduler == 'CyclicLR':
+        scheduler = optim.lr_scheduler.CyclicLR(optimizer, base_lr=0.01, max_lr=lr)
     # TODO: Add more schedulers
     elif use_lr_scheduler != 0:
         raise KeyError("LR scheduler not properly set !")
