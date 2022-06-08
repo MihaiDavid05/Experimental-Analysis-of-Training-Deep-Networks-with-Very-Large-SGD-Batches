@@ -6,33 +6,68 @@ config 1:
     If the first config worked, then I applied: minibatch_size = k * train_samples => k = 128 / 40000 = 0.0032 => new_lr = 0.1 * 0.0032 = 0.0003 (from second paper)
     But, it stopped due to early stopping (however it took waaay to long).
 
+config2:
+    Test accuracy around 79,5 %. But training could have gone longer. Also, a bit underfit, maybe too strong regularization.
+    Try other network and training schedule.
 
 
 Papers summary:
 
-*** https://arxiv.org/pdf/1404.5997.pdf
+***** https://arxiv.org/pdf/1804.07612.pdf
 
- - We can make data parallelism arbitrarily efficient if
-we are willing to increase the batch size (because the weight synchronization step is performed once per
-batch). But very big batch sizes adversely affect the rate at which SGD converges as well as the quality of
-the final solution.
- - As we take the effective batch size, 128K, into the thousands, using a smaller
-batch size in the fully-connected layers leads to faster convergence to better minima.
- - The first question that I investigate is the accuracy cost of larger batch sizes. This is a somewhat
-complicated question because the answer is dataset-dependent. Small, relatively homogeneous datasets
-benefit from smaller batch sizes more so than large, heterogeneous, noisy datasets.
- - When experimenting with different batch sizes, one must decide how to adjust the hyperparameters
-µ, ω, and epsilon. It seems plausible that the smoothing effects of momentum may be less necessary with bigger
-batch sizes, but in my experiments I used µ = 0.9
-for all batch sizes. Theory suggests that when multiplying the batch size by k, one should multiply the
-learning rate epsilon by √k to keep the variance in the gradient expectation constant.
- - Theory aside, for the batch sizes considered in this note, the heuristic that I found to work the
-best was to multiply the learning rate by k when multiplying the batch size by k. I can’t explain this
-discrepancy between theory and practice.
- - The main take-away is that there is an accuracy cost associated with bigger batch sizes, but it can be greatly reduced
-by using the variable batch size trick described in Section 4.2.
- - We can expect some loss of accuracy when training with bigger batch sizes. The magnitude of this loss
-is dataset-dependent, and it is generally smaller for larger, more varied datasets
+ - Use of large mini-batches increases the available computational parallelism, small batch training has been shown to provide
+improved generalization performance and allows a significantly smaller memory footprint
+ - We adopt a learning rate that corresponds to a constant average weight update per gradient calculation (i.e., per unit cost of computation),
+and point out that this results in a variance of the weight updates that increases linearly with the mini-batch size m.
+ - The collected experimental results for the CIFAR-10, CIFAR-100 and ImageNet datasets show that increasing the mini-batch size
+progressively reduces the range of learning rates that provide stable convergence and acceptable test performance.
+ - The best performance has been consistently obtained for mini-batch sizes between m = 2 and m = 32,
+which contrasts with recent work advocating the use of mini-batch sizes in the thousands.
+ - In this work, we suggest that the discussion about the scaling of the learning rate with the batch size depends on how
+the problem is formalized, and revert to the view of Wilson & Martinez (2003), that considers the SGD weight update formulation based
+on the sum, instead of the average, of the gradients over the mini-batch. (NOTE: reduction type in CrossEntropyLoss)
+ - From this perspective, using a fixed learning rate keeps the expectation of the weight update per training example constant for
+any choice of batch size.  At the same time holding the expected value of the weight update per gradient calculation
+constant while increasing the batch size implies a linear increase of the variance of the weight update with the batch size.
+ -  The results provide evidence that increasing the batch size results in both a
+degradation of the test performance and a progressively smaller range of learning rates that allows
+stable training, where the notion of stability here refers to the robust convergence of the training algorithm
+ - Hoffer et al. (2017) have shown empirically that the reduced generalization performance of large
+batch training is connected to the reduced number of parameter updates over the same number of
+epochs (which corresponds to the same computation cost in number of gradient calculations). Hoffer
+et al. (2017) present evidence that it is possible to achieve the same generalization performance with
+large batch size, by increasing the training duration to perform the same number of SGD updates.
+Since from (3) or (5) the number of gradient calculations per parameter update is proportional to the
+batch size m, this implies an increase in computation proportional to m.
+ - In order to reduce the computation cost for large batches due to the required longer training, Goyal
+et al. (2017) have investigated the possibility of limiting the training length to the same number
+of epochs. To this end, they have used larger learning rates with larger batch sizes based on the
+linear scaling rule, which from (5) is equivalent to keeping constant the value of η˜. As discussed
+in Section 2.2, this implies an increase of the variance of the weight update linearly with the batch
+size. The large batch training results of Goyal et al. (2017) report a reduction in generalization
+performance using the linear scaling rule with batch sizes up to 8192. However, Goyal et al. (2017)
+have found that the test performance of the small batch (m = 256) baseline could be recovered using
+a gradual warm-up strategy. We explore the impact of this strategy in Section 3.4 and find that it
+does not fully mitigate the degradation of the generalization performance with increased batch size.
+ - Jastrzebski et al. (2017) claim that both the SGD generalization performance and training dynamics
+are controlled by a noise factor given by the ratio between the learning rate and the batch size,
+which corresponds to linearly scaling the learning rate. The paper also suggests that the invariance
+to the simultaneous rescaling of both the learning rate and the batch size breaks if the learning rate
+becomes too large or the batch size becomes too small. However, the evidence presented in this
+paper only shows that the linear scaling rule breaks when it is applied to progressively larger batch
+sizes.
+ - It has been shown that the optimum momentum coefficient is dependent on the batch size (Smith & Le, 2017; Goyal et al.,
+2017). For this reason momentum was not used, with the purpose of isolating the interaction between batch size and learning rate.
+ - For all learning rates and all batch sizes, training has been performed over the same number of epochs, which corresponds to a constant
+computational complexity (a constant number of gradient calculations).
+ - Unless stated otherwise, all the experiments have been run for a total of 82 epochs for CIFAR-10 and
+164 epochs for CIFAR-100, with a learning rate schedule based on a reduction by a factor of 10 at 50% and at 75% of
+the total number of iterations. Weight decay has been also applied, with λ = 5 · 10−4 for the AlexNet model (Krizhevsky et al., 2012)
+and λ = 10−4 for the ResNet models (He et al., 2015a). In all cases, the weights have been initialized using the
+method described in He et al. (2015b).
+ - For all the results, the reported test or validation accuracy is the median of the final 5 epochs of
+training (Goyal et al., 2017).
+ - .................
 
 
 *** https://arxiv.org/pdf/1706.02677.pdf
@@ -64,7 +99,7 @@ we start from a learning rate of η and increment it by a constant amount at eac
 ηˆ = kη after 5 epochs (results are robust to the exact duration of warmup). After the warmup, we go back to the original learning rate schedule.
  - REMARK: Scaling the cross-entropy loss is not equivalent to scaling the learning rate.
  - !!!!!!! We refer to the factor ηt+1/ηt as the momentum correction !!!!!!!
- - REMARK: Apply momentum correction after changing learning rate if using
+ - REMARK: Apply momentum correction after changing learning rate.
  - REMARK: Use a single random shuffling of the training data (per epoch) that is divided amongst all k workers.
  - Applying the linear scaling rule along with a warmup strategy allows us to seamlessly scale between small and large
 minibatches (up to 8k images) without tuning additional hyper-parameters or impacting accuracy.
@@ -86,10 +121,64 @@ the gradual warmup strategy always starting with η = 0.1 and increasing linearl
  - They showed that multiplying LR with sqrt(k) works poor in practice.
 
 
+** https://arxiv.org/pdf/1404.5997.pdf
+
+ - We can make data parallelism arbitrarily efficient if
+we are willing to increase the batch size (because the weight synchronization step is performed once per
+batch). But very big batch sizes adversely affect the rate at which SGD converges as well as the quality of
+the final solution.
+ - As we take the effective batch size, 128K, into the thousands, using a smaller
+batch size in the fully-connected layers leads to faster convergence to better minima.
+ - The first question that I investigate is the accuracy cost of larger batch sizes. This is a somewhat
+complicated question because the answer is dataset-dependent. Small, relatively homogeneous datasets
+benefit from smaller batch sizes more so than large, heterogeneous, noisy datasets.
+ - When experimenting with different batch sizes, one must decide how to adjust the hyperparameters
+µ, ω, and epsilon. It seems plausible that the smoothing effects of momentum may be less necessary with bigger
+batch sizes, but in my experiments I used µ = 0.9
+for all batch sizes. Theory suggests that when multiplying the batch size by k, one should multiply the
+learning rate epsilon by √k to keep the variance in the gradient expectation constant.
+ - Theory aside, for the batch sizes considered in this note, the heuristic that I found to work the
+best was to multiply the learning rate by k when multiplying the batch size by k. I can’t explain this
+discrepancy between theory and practice.
+ - The main take-away is that there is an accuracy cost associated with bigger batch sizes, but it can be greatly reduced
+by using the variable batch size trick described in Section 4.2.
+ - We can expect some loss of accuracy when training with bigger batch sizes. The magnitude of this loss
+is dataset-dependent, and it is generally smaller for larger, more varied datasets
+
+
 * https://proceedings.neurips.cc/paper/2019/file/dc6a70712a252123c40d2adba6a11d84-Paper.pdf
 
--
+ - Empirical evidence of a training strategy that we should control the ratio of batch size to learning rate not too
+large to achieve a good generalization ability
+ - !!!!! We only consider the case that the batch size and learning rate are constant !!!!
+ - Batch size and learning rate, adjust the fluctuation of gradient
+ - [30] proves that for linear neural networks, batch size has an optimal value when the learning rate is fixed
+ - [29] suggests that increasing the batch size during the training of neural networks can receive the same result
+of decaying the learning rate when the rate of batch size to learning rate remains the same. This result is consistent with ours.
+
 
 * https://www.pure.ed.ac.uk/ws/portalfiles/portal/75846467/width_of_minima_reached_by_stochastic_gradient_descent_is_influenced_by_learning_rate_to_batch_size_ratio.pdf
 
-* https://openreview.net/attachment?id=B1eyO1BFPr&name=original_pdf
+ - We show that the dynamics and convergence properties of SGD are set by the ratio of learning rate to batch size
+ - We observe that this ratio is a key determinant of the generalization error, which we suggest is mediated by
+controlling the width of the final minima found by SGD.
+ - SGD performs similarly for different batch sizes but a constant LR/BS
+ - We derive a relation between LR/BS and the width of the minimum found by SGD
+ - We demonstrate experimentally that a larger LR/BS correlates with a wider endpoint of SGD and better generalization.
+ - There is a theoretical relationship between the expected loss value, the level of stochastic noise η/S in SGD, and the width of the
+minimum explored at this final stage of training
+ - Demonstrating that the learning dynamics are approximately invariant under changes in learning rate or batch size that
+keep the ratio η/S constant.
+ - Higher values of η/S push the optimization towards flatter regions
+ - Smaller datasets more sensitive to LR/BS ratio.
+
+
+* https://fid3024.github.io/papers/2020%20-%20Don't%20Use%20Large%20Mini-Batches,%20Use%20Local%20SGD.pdf
+
+ - Models trained with large batches often do not generalize well, i.e. they do not show good accuracy on new data
+ - We propose a post-local SGD and show that it significantly improves the generalization performance compared to
+large-batch training on standard benchmarks while enjoying the same efficiency (time-to-accuracy) and scalability
+ - !! Oriented on distributed learning !!
+
+
+NOTE: Focus on generalization power of large batches, instead of time efficiency, because we have a single GPU.
