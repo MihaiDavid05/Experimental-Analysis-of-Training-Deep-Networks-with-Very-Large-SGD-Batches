@@ -7,14 +7,14 @@ config 1:
     But, it stopped due to early stopping (however it took waaay to long).
 
 config2:
-    Test accuracy 79,5 %. But training could have gone longer. Also, a bit underfit, maybe too strong regularization.
+    Test accuracy 79,5 %. But training could have gone longer (fully run 100 ep).
     Try other network and training schedule.
 
-config3: 300 ep indtead of 100 BUT used early stopping
-    Stopped too early, around ep 70 !!!! Test accuracy was
+config3: 300 ep instead of 100 BUT used early stopping (compared to 2)
+    Stopped too early, around ep 70 !!!! Test accuracy was 78,5 %
 
-config4: Without earlystopping and with batchnorm momentum of 0.99
-    ?
+config4: Without earlystopping and with batchnorm momentum of 0.99 (compared to 3)
+    I stopped it at 280. Test accuracy was 81.08 ! Last 2 best models at epochs 140 and 244 !
 
 config5: Added the weight_decay and made steplr scheduler configurable and added new weight initialisations to network and changed rotation to 15
     ?
