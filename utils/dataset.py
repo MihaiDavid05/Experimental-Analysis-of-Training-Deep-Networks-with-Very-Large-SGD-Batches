@@ -22,7 +22,7 @@ def build_dataset(config, data_dir, train=False):
         if config["augmentations"] != 0 and train:
             # Add augmentations
             t.transforms.extend([transforms.RandomHorizontalFlip(),
-                                 transforms.RandomRotation(30),
+                                 transforms.RandomRotation(15),
                                  transforms.RandomAffine(degrees=0, translate=(0.1, 0.1))])
         dataset = CIFAR10(data_dir, train, transform=t, target_transform=None, download=False)
     elif config["dataset"] == 'cifar100':
@@ -32,7 +32,7 @@ def build_dataset(config, data_dir, train=False):
         if config["augmentations"] != 0 and train:
             # Add augmentations
             t.transforms.extend([transforms.RandomHorizontalFlip(),
-                                 transforms.RandomRotation(30),
+                                 transforms.RandomRotation(15),
                                  transforms.RandomAffine(degrees=0, translate=(0.1, 0.1))])
         dataset = CIFAR100(data_dir, train, transform=t, target_transform=None, download=False)
     else:

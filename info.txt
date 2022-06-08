@@ -16,7 +16,7 @@ config3: 300 ep indtead of 100 BUT used early stopping
 config4: Without earlystopping and with batchnorm momentum of 0.99
     ?
 
-config5: Added the weight_decay and made steplr scheduler configurable and added new weight initialisations to network.
+config5: Added the weight_decay and made steplr scheduler configurable and added new weight initialisations to network and changed rotation to 15
     ?
 
 
