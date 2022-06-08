@@ -27,6 +27,9 @@ def train(dataset, net, config, writer, device='cpu'):
     opt = config["optimizer"]
     stop_early = config["early_stopping"]
     stop_early_patience = config["early_stopping_patience"]
+    weight_decay = config["weight_decay"]
+    step_lr_stepsize = config["step_lr_stepsize"]
+    step_lr_gamma = config["step_lr_gamma"]
     scheduler = None
 
     # Create PyTorch DataLoaders
@@ -39,18 +42,17 @@ def train(dataset, net, config, writer, device='cpu'):
     if opt == "adam":
         optimizer = optim.Adam(net.parameters(), lr=lr, betas=(0.9, 0.999), eps=1e-08, amsgrad=False)
     elif opt == "sgd":
-        # TODO: update moemntum according to second paper, maybe also use weight decay
-        optimizer = optim.SGD(net.parameters(), lr=lr, momentum=0.9, weight_decay=0, nesterov=True)
+        # TODO: update moemntum according to second paper or don't use it !!!!
+        optimizer = optim.SGD(net.parameters(), lr=lr, momentum=0.9, weight_decay=weight_decay, nesterov=True)
     else:
         raise KeyError("Optimizer not properly set !")
 
     if use_lr_scheduler == 'ReduceOnPlateau':
         scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, mode='min', patience=10, factor=0.5)
     elif use_lr_scheduler == 'Step':
-        scheduler = optim.lr_scheduler.StepLR(optimizer, step_size=20, gamma=0.5)
+        scheduler = optim.lr_scheduler.StepLR(optimizer, step_size=step_lr_stepsize, gamma=step_lr_gamma)
     elif use_lr_scheduler == 'CyclicLR':
         scheduler = optim.lr_scheduler.CyclicLR(optimizer, base_lr=0.01, max_lr=lr)
-    # TODO: Add more schedulers
     elif use_lr_scheduler != 0:
         raise KeyError("LR scheduler not properly set !")
     criterion = nn.CrossEntropyLoss()

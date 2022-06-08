@@ -7,9 +7,12 @@
   "batch_size": 128,
   "epochs": 300,
   "learning_rate": 0.1,
-  "early_stopping": 1,
+  "early_stopping": 0,
   "early_stopping_patience": 12,
+  "weight_decay": 0.000001,
   "use_lr_scheduler": "Step",
+  "step_lr_gamma": 0.5,
+  "step_lr_stepsize": 30,
   "optimizer": "sgd",
   "checkpoint_dir": "checkpoints",
   "augmentations": 1
