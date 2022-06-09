@@ -6,7 +6,7 @@
   "dataset": "cifar10",
   "batch_size": 32,
   "epochs": 200,
-  "learning_rate": 0.001,
+  "learning_rate": 0.01,
   "early_stopping": 0,
   "early_stopping_patience": 12,
   "weight_decay": 0.000001,
