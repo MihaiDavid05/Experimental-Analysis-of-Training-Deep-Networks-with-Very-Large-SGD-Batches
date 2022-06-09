@@ -6,7 +6,7 @@ from tqdm import tqdm
 from torch.utils.data import random_split
 import numpy as np
 import time
-
+from torch_warmup_lr import WarmupLR
 # https://github.com/lehduong/torch-warmup-lr
 
 
@@ -45,7 +45,7 @@ def train(dataset, net, config, writer, device='cpu'):
         optimizer = optim.Adam(net.parameters(), lr=lr, betas=(0.9, 0.999), eps=1e-08, amsgrad=False)
     elif opt == "sgd":
         # TODO: update moemntum according to second paper or don't use it !!!!
-        optimizer = optim.SGD(net.parameters(), lr=lr, momentum=0.9, weight_decay=weight_decay, nesterov=True)
+        optimizer = optim.SGD(net.parameters(), lr=lr, momentum=0, weight_decay=weight_decay, nesterov=True)
     else:
         raise KeyError("Optimizer not properly set !")
 
@@ -57,7 +57,8 @@ def train(dataset, net, config, writer, device='cpu'):
         scheduler = optim.lr_scheduler.CyclicLR(optimizer, base_lr=0.01, max_lr=lr)
     elif use_lr_scheduler == 'GradualWarmup':
         scheduler_multisteplr = optim.lr_scheduler.MultiStepLR(optimizer, milestones=[30, 60, 90, 120, 140], gamma=0.1)
-        scheduler = GradualWarmupScheduler(optimizer, multiplier=1, total_epoch=5, after_scheduler=scheduler_multisteplr)
+        scheduler = WarmupLR(scheduler_multisteplr, init_lr=0.001, num_warmup=5, warmup_strategy='linear')
+        # TODO: check init learning rate here
     elif use_lr_scheduler != 0:
         raise KeyError("LR scheduler not properly set !")
     criterion = nn.CrossEntropyLoss()
