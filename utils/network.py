@@ -6,7 +6,7 @@ import torch.nn as nn
 class VGG16CIFAR(nn.Module):
     def __init__(self, n_classes, init_weights=True):
         super(VGG16CIFAR, self).__init__()
-        # TODO: Maybe delete Batchnorm, or see momentum and alpha/beta init values as in Facebook paper (but harder)
+        # TODO: Maybe delete Batchnorm or use GhostBN
         self.n_classes = n_classes
 
         self.model = nn.Sequential(

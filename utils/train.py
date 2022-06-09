@@ -42,7 +42,7 @@ def train(dataset, net, config, writer, device='cpu'):
     if opt == "adam":
         optimizer = optim.Adam(net.parameters(), lr=lr, betas=(0.9, 0.999), eps=1e-08, amsgrad=False)
     elif opt == "sgd":
-        # TODO: update moemntum according to Facebook paper or don't use it as in the paper from Scott !!!!
+        # TODO: update moemntum according to second paper or don't use it !!!!
         optimizer = optim.SGD(net.parameters(), lr=lr, momentum=0.9, weight_decay=weight_decay, nesterov=True)
     else:
         raise KeyError("Optimizer not properly set !")
@@ -164,7 +164,6 @@ def train(dataset, net, config, writer, device='cpu'):
         writer.add_scalars('Loss', {'train': epoch_loss, 'val': val_loss}, epoch)
 
         # Save model if necessary
-        # TODO: Maybe save last 5 models for foxed epoch training for getting the last 5 mean accuracy !
         if val_score > max_val_score:
             max_val_score = val_score
             print("Current maximum validation accuracy is: {}\n".format(max_val_score))
