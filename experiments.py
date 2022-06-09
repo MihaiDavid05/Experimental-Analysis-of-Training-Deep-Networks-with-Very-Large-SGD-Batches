@@ -47,7 +47,7 @@ for config_filename in os.listdir(config_path):
         with open(os.path.join(config_path, config_filename)) as json_config:
             config = json.load(json_config)
 
-        config["name"] = config_filename
+        config["name"] = config_filename.split('.')[0]
 
         # Set folder for logging
         log_dir = config["log_dir"] + '/' + experiment_path + '/' + config["name"]

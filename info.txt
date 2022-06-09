@@ -190,6 +190,7 @@ keep the ratio η/S constant.
 large-batch training on standard benchmarks while enjoying the same efficiency (time-to-accuracy) and scalability
  - !! Oriented on distributed learning !!
 
+
 * Hoffer: https://arxiv.org/pdf/1705.08741.pdf
 
  - Fixed learning rate that decreases exponentially every few epochs
@@ -200,7 +201,7 @@ large-batch training on standard benchmarks while enjoying the same efficiency (
  - We "stretched" the time-frame of the optimization process, where each time period of e epochs in the original regime,
 will be transformed to |BL|/|BS| * e epochs according to the mini-batch size used.
  - ηL = sqrt(|BL|/|BS|) * ηS where ηS is the original learning rate used for small batch, ηL
-is the adapted learning rate and |BL|, |BS| are the large and small batch sizes, respectively.
+is the adapted learning rate and |BL| - 4096, |BS| - 128 are the large and small batch sizes, respectively.
  - Ghost batch size is 128.
 
 

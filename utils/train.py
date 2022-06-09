@@ -7,6 +7,8 @@ from torch.utils.data import random_split
 import numpy as np
 import time
 
+# https://github.com/lehduong/torch-warmup-lr
+
 
 def train(dataset, net, config, writer, device='cpu'):
     """
@@ -53,6 +55,9 @@ def train(dataset, net, config, writer, device='cpu'):
         scheduler = optim.lr_scheduler.StepLR(optimizer, step_size=step_lr_stepsize, gamma=step_lr_gamma)
     elif use_lr_scheduler == 'CyclicLR':
         scheduler = optim.lr_scheduler.CyclicLR(optimizer, base_lr=0.01, max_lr=lr)
+    elif use_lr_scheduler == 'GradualWarmup':
+        scheduler_multisteplr = optim.lr_scheduler.MultiStepLR(optimizer, milestones=[30, 60, 90, 120, 140], gamma=0.1)
+        scheduler = GradualWarmupScheduler(optimizer, multiplier=1, total_epoch=5, after_scheduler=scheduler_multisteplr)
     elif use_lr_scheduler != 0:
         raise KeyError("LR scheduler not properly set !")
     criterion = nn.CrossEntropyLoss()
