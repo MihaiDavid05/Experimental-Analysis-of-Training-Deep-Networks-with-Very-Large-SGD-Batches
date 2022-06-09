@@ -44,8 +44,8 @@ def train(dataset, net, config, writer, device='cpu'):
     if opt == "adam":
         optimizer = optim.Adam(net.parameters(), lr=lr, betas=(0.9, 0.999), eps=1e-08, amsgrad=False)
     elif opt == "sgd":
-        # TODO: update moemntum according to second paper or don't use it !!!!
-        optimizer = optim.SGD(net.parameters(), lr=lr, momentum=0, weight_decay=weight_decay, nesterov=True)
+        # TODO: update moemntum+nesterov according to second paper or don't use it !!!!
+        optimizer = optim.SGD(net.parameters(), lr=lr, momentum=0, weight_decay=weight_decay, nesterov=False)
     else:
         raise KeyError("Optimizer not properly set !")
 
