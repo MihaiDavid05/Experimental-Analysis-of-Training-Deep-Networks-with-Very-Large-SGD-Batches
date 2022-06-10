@@ -42,67 +42,50 @@ class GhostBatchNorm(BatchNorm):
 
 
 # REF: https://github.com/geifmany/cifar-vgg/blob/master/cifar10vgg.py
-class VGG16CIFARBN(nn.Module):
+class VGG13CIFARBN(nn.Module):
     def __init__(self, n_classes, init_weights=True):
-        super(VGG16CIFARBN, self).__init__()
+        super(VGG13CIFARBN, self).__init__()
 
         self.n_classes = n_classes
         self.model = nn.Sequential(
             nn.Conv2d(3, 64, kernel_size=(3, 3), padding='same'),
-            nn.ReLU(inplace=True),
             nn.BatchNorm2d(64, momentum=0.99),
-            nn.Dropout(0.3),
+            nn.ReLU(inplace=True),
             nn.Conv2d(64, 64, kernel_size=(3, 3), padding='same'),
-            nn.ReLU(inplace=True),
             nn.BatchNorm2d(64, momentum=0.99),
+            nn.ReLU(inplace=True),
             nn.MaxPool2d(2),
 
             nn.Conv2d(64, 128, kernel_size=(3, 3), padding='same'),
-            nn.ReLU(inplace=True),
             nn.BatchNorm2d(128, momentum=0.99),
-            nn.Dropout(0.4),
+            nn.ReLU(inplace=True),
             nn.Conv2d(128, 128, kernel_size=(3, 3), padding='same'),
-            nn.ReLU(inplace=True),
             nn.BatchNorm2d(128, momentum=0.99),
+            nn.ReLU(inplace=True),
             nn.MaxPool2d(2),
 
             nn.Conv2d(128, 256, kernel_size=(3, 3), padding='same'),
-            nn.ReLU(inplace=True),
             nn.BatchNorm2d(256, momentum=0.99),
-            nn.Dropout(0.4),
+            nn.ReLU(inplace=True),
             nn.Conv2d(256, 256, kernel_size=(3, 3), padding='same'),
-            nn.ReLU(inplace=True),
             nn.BatchNorm2d(256, momentum=0.99),
-            nn.Dropout(0.4),
-            nn.Conv2d(256, 256, kernel_size=(3, 3), padding='same'),
             nn.ReLU(inplace=True),
-            nn.BatchNorm2d(256, momentum=0.99),
             nn.MaxPool2d(2),
 
             nn.Conv2d(256, 512, kernel_size=(3, 3), padding='same'),
-            nn.ReLU(inplace=True),
             nn.BatchNorm2d(512, momentum=0.99),
-            nn.Dropout(0.4),
+            nn.ReLU(inplace=True),
             nn.Conv2d(512, 512, kernel_size=(3, 3), padding='same'),
-            nn.ReLU(inplace=True),
             nn.BatchNorm2d(512, momentum=0.99),
-            nn.Dropout(0.4),
-            nn.Conv2d(512, 512, kernel_size=(3, 3), padding='same'),
             nn.ReLU(inplace=True),
-            nn.BatchNorm2d(512, momentum=0.99),
             nn.MaxPool2d(2),
 
             nn.Conv2d(512, 512, kernel_size=(3, 3), padding='same'),
-            nn.ReLU(inplace=True),
             nn.BatchNorm2d(512, momentum=0.99),
-            nn.Dropout(0.4),
+            nn.ReLU(inplace=True),
             nn.Conv2d(512, 512, kernel_size=(3, 3), padding='same'),
-            nn.ReLU(inplace=True),
             nn.BatchNorm2d(512, momentum=0.99),
-            nn.Dropout(0.4),
-            nn.Conv2d(512, 512, kernel_size=(3, 3), padding='same'),
             nn.ReLU(inplace=True),
-            nn.BatchNorm2d(512, momentum=0.99),
             nn.MaxPool2d(2),
 
             nn.Dropout(0.5),
@@ -135,68 +118,54 @@ class VGG16CIFARBN(nn.Module):
         return logits
 
 
-class VGG16CIFARBNGHOST(nn.Module):
-    def __init__(self, n_classes, init_weights=True):
-        super(VGG16CIFARBNGHOST, self).__init__()
+class VGG13CIFARBNGHOST(nn.Module):
+    def __init__(self, n_classes, batch_size, splits_denom=32, init_weights=True):
+        super(VGG13CIFARBNGHOST, self).__init__()
 
         self.n_classes = n_classes
+        if batch_size < splits_denom:
+            raise KeyError("Batch size needs to be higher than splits denominator!")
+        self.nr_splits = batch_size / splits_denom
 
         self.model = nn.Sequential(
             nn.Conv2d(3, 64, kernel_size=(3, 3), padding='same'),
+            GhostBatchNorm(64, num_splits=self.nr_splits, momentum=0.99),
             nn.ReLU(inplace=True),
-            GhostBatchNorm(64, num_splits=4, momentum=0.99),
-            nn.Dropout(0.3),
             nn.Conv2d(64, 64, kernel_size=(3, 3), padding='same'),
+            GhostBatchNorm(64, num_splits=self.nr_splits, momentum=0.99),
             nn.ReLU(inplace=True),
-            GhostBatchNorm(64, num_splits=4, momentum=0.99),
             nn.MaxPool2d(2),
 
             nn.Conv2d(64, 128, kernel_size=(3, 3), padding='same'),
+            GhostBatchNorm(128, num_splits=self.nr_splits, momentum=0.99),
             nn.ReLU(inplace=True),
-            GhostBatchNorm(128, num_splits=4, momentum=0.99),
-            nn.Dropout(0.4),
             nn.Conv2d(128, 128, kernel_size=(3, 3), padding='same'),
+            GhostBatchNorm(128, num_splits=self.nr_splits, momentum=0.99),
             nn.ReLU(inplace=True),
-            GhostBatchNorm(128, num_splits=4, momentum=0.99),
             nn.MaxPool2d(2),
 
             nn.Conv2d(128, 256, kernel_size=(3, 3), padding='same'),
+            GhostBatchNorm(256, num_splits=self.nr_splits, momentum=0.99),
             nn.ReLU(inplace=True),
-            GhostBatchNorm(256, num_splits=4, momentum=0.99),
-            nn.Dropout(0.4),
             nn.Conv2d(256, 256, kernel_size=(3, 3), padding='same'),
+            GhostBatchNorm(256, num_splits=self.nr_splits, momentum=0.99),
             nn.ReLU(inplace=True),
-            GhostBatchNorm(256, num_splits=4, momentum=0.99),
-            nn.Dropout(0.4),
-            nn.Conv2d(256, 256, kernel_size=(3, 3), padding='same'),
-            nn.ReLU(inplace=True),
-            GhostBatchNorm(256, num_splits=4, momentum=0.99),
             nn.MaxPool2d(2),
 
             nn.Conv2d(256, 512, kernel_size=(3, 3), padding='same'),
+            GhostBatchNorm(512, num_splits=self.nr_splits, momentum=0.99),
             nn.ReLU(inplace=True),
-            GhostBatchNorm(512, num_splits=4, momentum=0.99),
-            nn.Dropout(0.4),
             nn.Conv2d(512, 512, kernel_size=(3, 3), padding='same'),
+            GhostBatchNorm(512, num_splits=self.nr_splits, momentum=0.99),
             nn.ReLU(inplace=True),
-            GhostBatchNorm(512, num_splits=4, momentum=0.99),
-            nn.Dropout(0.4),
-            nn.Conv2d(512, 512, kernel_size=(3, 3), padding='same'),
-            nn.ReLU(inplace=True),
-            GhostBatchNorm(512, num_splits=4, momentum=0.99),
             nn.MaxPool2d(2),
 
             nn.Conv2d(512, 512, kernel_size=(3, 3), padding='same'),
+            GhostBatchNorm(512, num_splits=self.nr_splits, momentum=0.99),
             nn.ReLU(inplace=True),
-            GhostBatchNorm(512, num_splits=4, momentum=0.99),
-            nn.Dropout(0.4),
             nn.Conv2d(512, 512, kernel_size=(3, 3), padding='same'),
+            GhostBatchNorm(512, num_splits=self.nr_splits, momentum=0.99),
             nn.ReLU(inplace=True),
-            GhostBatchNorm(512, num_splits=4, momentum=0.99),
-            nn.Dropout(0.4),
-            nn.Conv2d(512, 512, kernel_size=(3, 3), padding='same'),
-            nn.ReLU(inplace=True),
-            GhostBatchNorm(512, num_splits=4, momentum=0.99),
             nn.MaxPool2d(2),
 
             nn.Dropout(0.5),
@@ -228,52 +197,38 @@ class VGG16CIFARBNGHOST(nn.Module):
         return logits
 
 
-class VGG16CIFAR(nn.Module):
+class VGG13CIFAR(nn.Module):
     def __init__(self, n_classes, init_weights=True):
-        super(VGG16CIFAR, self).__init__()
+        super(VGG13CIFAR, self).__init__()
 
         self.n_classes = n_classes
         self.model = nn.Sequential(
             nn.Conv2d(3, 64, kernel_size=(3, 3), padding='same'),
             nn.ReLU(inplace=True),
-            nn.Dropout(0.3),
             nn.Conv2d(64, 64, kernel_size=(3, 3), padding='same'),
             nn.ReLU(inplace=True),
             nn.MaxPool2d(2),
 
             nn.Conv2d(64, 128, kernel_size=(3, 3), padding='same'),
             nn.ReLU(inplace=True),
-            nn.Dropout(0.4),
             nn.Conv2d(128, 128, kernel_size=(3, 3), padding='same'),
             nn.ReLU(inplace=True),
             nn.MaxPool2d(2),
 
             nn.Conv2d(128, 256, kernel_size=(3, 3), padding='same'),
             nn.ReLU(inplace=True),
-            nn.Dropout(0.4),
-            nn.Conv2d(256, 256, kernel_size=(3, 3), padding='same'),
-            nn.ReLU(inplace=True),
-            nn.Dropout(0.4),
             nn.Conv2d(256, 256, kernel_size=(3, 3), padding='same'),
             nn.ReLU(inplace=True),
             nn.MaxPool2d(2),
 
             nn.Conv2d(256, 512, kernel_size=(3, 3), padding='same'),
             nn.ReLU(inplace=True),
-            nn.Dropout(0.4),
-            nn.Conv2d(512, 512, kernel_size=(3, 3), padding='same'),
-            nn.ReLU(inplace=True),
-            nn.Dropout(0.4),
             nn.Conv2d(512, 512, kernel_size=(3, 3), padding='same'),
             nn.ReLU(inplace=True),
             nn.MaxPool2d(2),
 
             nn.Conv2d(512, 512, kernel_size=(3, 3), padding='same'),
             nn.ReLU(inplace=True),
-            nn.Dropout(0.4),
-            nn.Conv2d(512, 512, kernel_size=(3, 3), padding='same'),
-            nn.ReLU(inplace=True),
-            nn.Dropout(0.4),
             nn.Conv2d(512, 512, kernel_size=(3, 3), padding='same'),
             nn.ReLU(inplace=True),
             nn.MaxPool2d(2),
@@ -324,35 +279,12 @@ def build_network(config):
         num_classes = 100
 
     # Create network from pytorch base implementation
-    if config["model"] == 'vgg13_bn':
-        net = vgg13_bn()
-        net.avgpool = nn.Identity()
-        net.classifier = nn.Sequential(
-            nn.Dropout(),
-            nn.Flatten(),
-            nn.Linear(512, 512),
-            nn.ReLU(True),
-            nn.Dropout(),
-            nn.Linear(512, num_classes)
-        )
+    if config["model"] == 'vgg13bn':
+        net = VGG13CIFARBN(num_classes)
+    elif config["model"] == 'vgg13ghostbn':
+        net = VGG13CIFARBNGHOST(num_classes, config["batch_size"])
     elif config["model"] == 'vgg13':
-        net = vgg13()
-
-        net.avgpool = nn.Identity()
-        net.classifier = nn.Sequential(
-            nn.Dropout(),
-            nn.Flatten(),
-            nn.Linear(512, 512),
-            nn.ReLU(True),
-            nn.Dropout(),
-            nn.Linear(512, num_classes)
-        )
-    elif config["model"] == 'vgg16cifarBN':
-        net = VGG16CIFARBN(num_classes)
-    elif config["model"] == 'vgg16cifarGhostBN':
-        net = VGG16CIFARBNGHOST(num_classes)
-    elif config["model"] == 'vgg16cifar':
-        net = VGG16CIFAR(num_classes)
+        net = VGG13CIFAR(num_classes)
     else:
         raise KeyError("Model specified not implemented")
     return net

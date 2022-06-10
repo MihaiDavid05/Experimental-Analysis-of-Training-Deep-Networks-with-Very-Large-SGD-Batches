@@ -44,7 +44,6 @@ def train(dataset, net, config, writer, device='cpu'):
     if opt == "adam":
         optimizer = optim.Adam(net.parameters(), lr=lr, betas=(0.9, 0.999), eps=1e-08, amsgrad=False)
     elif opt == "sgd":
-        # TODO: update moemntum+nesterov according to second paper or don't use it !!!!
         optimizer = optim.SGD(net.parameters(), lr=lr, momentum=0, weight_decay=weight_decay, nesterov=False)
     else:
         raise KeyError("Optimizer not properly set !")
@@ -55,10 +54,10 @@ def train(dataset, net, config, writer, device='cpu'):
         scheduler = optim.lr_scheduler.StepLR(optimizer, step_size=step_lr_stepsize, gamma=step_lr_gamma)
     elif use_lr_scheduler == 'CyclicLR':
         scheduler = optim.lr_scheduler.CyclicLR(optimizer, base_lr=0.01, max_lr=lr)
+        # TODO: Check cycles for this
     elif use_lr_scheduler == 'GradualWarmup':
         scheduler_multisteplr = optim.lr_scheduler.MultiStepLR(optimizer, milestones=[30, 60, 90], gamma=0.1)
         scheduler = WarmupLR(scheduler_multisteplr, init_lr=0.01, num_warmup=5, warmup_strategy='linear')
-        # TODO: check init learning rate here
     elif use_lr_scheduler != 0:
         raise KeyError("LR scheduler not properly set !")
     criterion = nn.CrossEntropyLoss()
