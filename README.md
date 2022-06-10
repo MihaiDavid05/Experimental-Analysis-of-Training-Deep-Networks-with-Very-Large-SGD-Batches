@@ -26,6 +26,7 @@ NOTE: Search for a compatible cudatoolkit version with your local GPU.
 Other necessary installations:
 ```bash
 pip install numpy tensorboard tqdm pillow pandas
+pip install git+https://github.com/lehduong/torch-warmup-lr.git
 ```
 
 You may encouter an error with tensorboard at runtime, when working locally. Install this:
