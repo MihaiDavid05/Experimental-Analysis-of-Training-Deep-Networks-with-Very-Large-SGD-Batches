@@ -125,7 +125,7 @@ class VGG13CIFARBNGHOST(nn.Module):
         self.n_classes = n_classes
         if batch_size < splits_denom:
             raise KeyError("Batch size needs to be higher than splits denominator!")
-        self.nr_splits = batch_size / splits_denom
+        self.nr_splits = batch_size // splits_denom
 
         self.model = nn.Sequential(
             nn.Conv2d(3, 64, kernel_size=(3, 3), padding='same'),
