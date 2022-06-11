@@ -13,6 +13,7 @@ class BatchNorm(nn.BatchNorm2d):
         self.bias.requires_grad = bias
 
 
+# REF: https://github.com/nixx14/Ghost-BatchNormalisation-/blob/master/GhostBatchNorm.ipynb
 class GhostBatchNorm(BatchNorm):
     def __init__(self, num_features, num_splits, **kw):
         super().__init__(num_features, **kw)

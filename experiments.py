@@ -78,7 +78,8 @@ for config_filename in os.listdir(config_path):
         train(dataset, net, config, writer, device=device)
 
         # Log scores
-        log_path = f"logs/{experiment_path}/{config_filename}"
+        cfg_name = config["name"]
+        log_path = f"logs/{experiment_path}/{cfg_name}"
         get_events_data(log_path, False, True, log_path, to_watch='_lr')
         get_events_data(log_path + "/Loss_train", False, True, log_path, to_watch='_loss_train')
         get_events_data(log_path + "/Loss_val", False, True, log_path, to_watch='_loss_val')
