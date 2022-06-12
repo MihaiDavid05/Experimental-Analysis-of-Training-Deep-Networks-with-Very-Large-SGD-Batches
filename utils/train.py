@@ -56,7 +56,7 @@ def train(dataset, net, config, writer, device='cpu'):
         # 40,000 training samples, make a cycle of 2*12 epochs (96 in total) => 24 epochs per cycle
         # FIXME: Tested only for batch 32, change base_lr and max_lr
         iter_per_epoch = len(train_loader) // batch_size
-        scheduler = optim.lr_scheduler.CyclicLR(optimizer, base_lr=0.001, max_lr=0.1, step_size_up=12*iter_per_epoch,
+        scheduler = optim.lr_scheduler.CyclicLR(optimizer, base_lr=lr/10, max_lr=lr*10, step_size_up=12*iter_per_epoch,
                                                 mode='triangular2', gamma=1.0)
     elif use_lr_scheduler == 'GradualWarmup':
         scheduler_multisteplr = optim.lr_scheduler.MultiStepLR(optimizer, milestones=[25, 55, 85], gamma=0.1)
@@ -99,7 +99,10 @@ def train(dataset, net, config, writer, device='cpu'):
             wrong_train += (len(images) - np.sum(pred_bool_val))
             # Compute loss
             loss = criterion(preds, targets)
-            writer.add_scalar("Lr", optimizer.param_groups[0]['lr'], epoch)
+            if use_lr_scheduler != "CyclicLR":
+                writer.add_scalar("Lr", optimizer.param_groups[0]['lr'], epoch)
+            else:
+                writer.add_scalar("Lr", optimizer.param_groups[0]['lr'], global_step)
             # Perform backward pass
             loss.backward()
             optimizer.step()
