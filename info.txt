@@ -210,38 +210,49 @@ NOTE: Focus on generalization power of large batches, instead of time efficiency
 
 EXPERIEMNTS RESULTS
 
-We need to do a LR grid search for the smallest batch size that we use.
-Maybe use gradient clipping for high batch sizes ?!?!
-Maybe use GhostBatchNorm from https://github.com/nixx14/Ghost-BatchNormalisation-/blob/master/GhostBatchNorm.ipynb
-
+Improvements: Maybe use gradient clipping for high batch sizes ?!
 
 Exp1:
-    All the experiments needed longer runs especially the last 2, even when they fully run.
-    From the first 2 we see that it needed x3 nr epochs for a batch size x16 bigger. So
+    Looks fair enough !
 
-    config1: stopped at 70 - 86.06 test acc
-    config2: stopped at 196 - 77.16 test acc
-    config3: stopped at 163 - 63.57 test acc
-    config4: full run 300 - 65.13 test acc
-    config5: full run 300 - 52.03 test acc
+    config1: 86.37 test acc ; 51.30 sec avg time / epoch
+    config2: 85.08 test acc ; 48.20 sec avg time / epoch
+    config3: 82.37 test acc ; 41.33 sec avg time / epoch
+    config4: 74.40 test acc ; 41.25 sec avg time / epoch
+    config5: 59.12 test acc ; 40.77 sec avg time / epoch
 
 Exp2:
-    The initial learning rates were way too high ! Maybe the scaling that we use is very bad !
-    (the reference LR i not good either, as the first config performs worse than the one in the first group of experiments)
 
-    config1: stopped at 35 - 82.64 test acc
-    config2: LOSS INCREASING and stopped at 11 - 14 test acc (LR WAY TO HIGH I GUESS)
-    config3: LOSS NAN from the first epoch
-    config4: LOSS NAN from the first epoch
-    config5: LOSS NAN from the first epoch
+    config1:
+    config2:
+    config3:
+    config4:
+    config5:
 
 Exp3:
-    It seems that the LR for the first config was again too high.
-    However, as we start with a LR of 0.01 (in CyclicLR) is highly beneficial for the bigger batches.
-    So, scaling the LR with batch size does not seem that good.
+    For batch_size >= 512, the scaling rule + GhostBN does not help anymore.
 
-    config1: TRAINING LOSS WAS INCREASING, THE LR REMAINED CONSTANT due to base == max lr stopped at 43 - 82.82 test acc
-    config2: stopped at 58 - 81.71 test acc
-    config3: stopped at 86 - 81.11 test acc
-    config4: stopped at 113 - 82.75 test acc
-    config5: TRAINING LOSS WAS INCREASING AND WENT CRAZY stopped at 25 - 32.65
+    config1: 88.22 test acc ; 51.4 sec avg time / epoch
+    config2: 88.51 test acc ; 48.31 sec avg time / epoch
+    config3: 88.44 test acc ; 40.81 sec avg time / epoch
+    config4: 88.18 test acc ; 40.81 sec avg time / epoch
+    config5: 81.29 test acc ; 40.84 sec avg time / epoch
+
+Exp4:
+    GradualWarmup initial value not done right (see gradual_LR.png)!!!! I think the scheduler step must be in the beginning and also change milestones!
+    BUT, it helps for bigger batches !
+
+    config1: 87.95 test acc ; 48.44 sec avg time / epoch
+    config2: 88.05 test acc ; 45.91 sec avg time / epoch
+    config3: 87.97 test acc ; 32.58 sec avg time / epoch
+    config4: 88.03 test acc ; 36.06 sec avg time / epoch
+    config5: 88.00 test acc ; 34.58 sec avg time / epoch
+
+Exp5:
+    Maybe use CyclicLR here !!!
+
+    config1:
+    config2:
+    config3:
+    config4:
+    config5:
