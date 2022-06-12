@@ -67,6 +67,7 @@ class GhostBatchNorm1d(BatchNorm1d):
         return super().train(mode)
 
     def forward(self, input):
+        # TODO: Check this implementation
         N, C = input.shape
         if self.training or not self.track_running_stats:
             return F.batch_norm(

@@ -236,7 +236,7 @@ Exp3:
     config2: 88.51 test acc ; 48.31 sec avg time / epoch
     config3: 88.44 test acc ; 40.81 sec avg time / epoch
     config4: 88.18 test acc ; 40.81 sec avg time / epoch
-    config5: 81.29 test acc ; 40.84 sec avg time / epoch
+    config5: 81.29 test acc ; 39.22 sec avg time / epoch ----- 78.91 test acc with GhostBN for classifier (maybe it is bad implemented)
 
 Exp4:
     GradualWarmup initial value not done right (see gradual_LR.png)!!!! I think the scheduler step must be in the beginning and also change milestones!
