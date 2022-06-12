@@ -78,6 +78,10 @@ def train(dataset, net, config, writer, device='cpu'):
         epoch_loss = 0
         start = time.time()
 
+        # Update LR according to gradual warmup schedule
+        if scheduler is not None and use_lr_scheduler == 'GradualWarmup':
+            scheduler.step()
+
         for batch in tqdm(train_loader):
             # Get image and target
             images = batch[0].to(device=device, dtype=torch.float32)
@@ -116,10 +120,6 @@ def train(dataset, net, config, writer, device='cpu'):
         # Evaluate model after each epoch
         print(f'Validation started !\n')
         net.eval()
-
-        # Update LR according to gradual warmup schedule
-        if scheduler is not None and use_lr_scheduler == 'GradualWarmup':
-            scheduler.step()
 
         # Initialize varibales
         val_loss = 0
