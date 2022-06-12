@@ -56,7 +56,7 @@ def train(dataset, net, config, writer, device='cpu'):
         scheduler = optim.lr_scheduler.CyclicLR(optimizer, base_lr=0.01, max_lr=lr)
         # TODO: Check cycles for this
     elif use_lr_scheduler == 'GradualWarmup':
-        scheduler_multisteplr = optim.lr_scheduler.MultiStepLR(optimizer, milestones=[30, 60, 90], gamma=0.1)
+        scheduler_multisteplr = optim.lr_scheduler.MultiStepLR(optimizer, milestones=[25, 55, 85], gamma=0.1)
         scheduler = WarmupLR(scheduler_multisteplr, init_lr=0.01, num_warmup=5, warmup_strategy='linear')
     elif use_lr_scheduler != 0:
         raise KeyError("LR scheduler not properly set !")
