@@ -55,7 +55,7 @@ def train(dataset, net, config, writer, device='cpu'):
     elif use_lr_scheduler == 'CyclicLR':
         # 40,000 training samples, make a cycle of 2*12 epochs (96 in total) => 24 epochs per cycle
         # FIXME: Tested only for batch 32, change base_lr and max_lr
-        iter_per_epoch = len(train_loader) // batch_size
+        iter_per_epoch = len(train_images) // batch_size
         scheduler = optim.lr_scheduler.CyclicLR(optimizer, base_lr=lr/10, max_lr=lr*10, step_size_up=12*iter_per_epoch,
                                                 mode='triangular2', gamma=1.0)
     elif use_lr_scheduler == 'GradualWarmup':
