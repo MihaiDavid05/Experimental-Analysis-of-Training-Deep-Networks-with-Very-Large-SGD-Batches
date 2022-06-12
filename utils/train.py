@@ -53,8 +53,11 @@ def train(dataset, net, config, writer, device='cpu'):
     elif use_lr_scheduler == 'Step':
         scheduler = optim.lr_scheduler.StepLR(optimizer, step_size=step_lr_stepsize, gamma=step_lr_gamma)
     elif use_lr_scheduler == 'CyclicLR':
-        scheduler = optim.lr_scheduler.CyclicLR(optimizer, base_lr=0.01, max_lr=lr)
-        # TODO: Check cycles for this
+        # 40,000 training samples, make a cycle of 2*12 epochs (96 in total) => 24 epochs per cycle
+        # FIXME: Tested only for batch 32, change base_lr and max_lr
+        iter_per_epoch = len(train_loader) // batch_size
+        scheduler = optim.lr_scheduler.CyclicLR(optimizer, base_lr=0.001, max_lr=0.1, step_size_up=12*iter_per_epoch,
+                                                mode='triangular2', gamma=1.0)
     elif use_lr_scheduler == 'GradualWarmup':
         scheduler_multisteplr = optim.lr_scheduler.MultiStepLR(optimizer, milestones=[25, 55, 85], gamma=0.1)
         scheduler = WarmupLR(scheduler_multisteplr, init_lr=0.01, num_warmup=5, warmup_strategy='linear')
@@ -103,6 +106,10 @@ def train(dataset, net, config, writer, device='cpu'):
             # Update global step value and epoch loss
             global_step += 1
             epoch_loss += loss.item()
+
+            # Update LR according to cyclic schedule
+            if scheduler is not None and use_lr_scheduler == 'CyclicLR':
+                scheduler.step()
 
         # Compute per epoch training loss
         epoch_loss = epoch_loss / len(train_loader)
@@ -163,7 +170,7 @@ def train(dataset, net, config, writer, device='cpu'):
         val_score = ((n_correct * 1.0) / (n_correct + n_wrong)) * 100
 
         # Update learning rate accordingly
-        if scheduler is not None and use_lr_scheduler != 'GradualWarmup':
+        if scheduler is not None and use_lr_scheduler != 'GradualWarmup' and use_lr_scheduler != 'CyclicLR':
             if use_lr_scheduler == 'ReduceOnPlateau':
                 scheduler.step(val_loss)
             else:
