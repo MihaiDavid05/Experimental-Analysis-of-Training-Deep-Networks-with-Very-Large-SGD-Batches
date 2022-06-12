@@ -117,6 +117,10 @@ def train(dataset, net, config, writer, device='cpu'):
         print(f'Validation started !\n')
         net.eval()
 
+        # Update LR according to gradual warmup schedule
+        if scheduler is not None and use_lr_scheduler == 'GradualWarmup':
+            scheduler.step()
+
         # Initialize varibales
         val_loss = 0
         n_correct = 0
@@ -159,7 +163,7 @@ def train(dataset, net, config, writer, device='cpu'):
         val_score = ((n_correct * 1.0) / (n_correct + n_wrong)) * 100
 
         # Update learning rate accordingly
-        if scheduler is not None:
+        if scheduler is not None and use_lr_scheduler != 'GradualWarmup':
             if use_lr_scheduler == 'ReduceOnPlateau':
                 scheduler.step(val_loss)
             else:
