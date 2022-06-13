@@ -255,5 +255,5 @@ Exp5:
     config3: 90.78 test acc ; 49.99 sec avg time / epoch
     config4: 90.78 test acc ; 42.83 sec avg time / epoch
     config5: 90.23 test acc ; 42.67 sec avg time / epoch
-    config6: ???????
+    config6: 82.79 test acc ; 42.40 sec avg time / epoch
 
