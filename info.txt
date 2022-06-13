@@ -79,6 +79,9 @@ method described in He et al. (2015b).
 training (Goyal et al., 2017).
  - .................
 
+ !!!!  the use of a gradual warm-up did improve the performance of the large batch sizes, but did not fully recover the
+performance achieved with the smallest batch sizes. That's why we used cyclicLR !!!!!!
+
 
 *** https://arxiv.org/pdf/1706.02677.pdf
 
@@ -208,7 +211,7 @@ is the adapted learning rate and |BL| - 4096, |BS| - 128 are the large and small
 NOTE: Focus on generalization power of large batches, instead of time efficiency, because we have a single GPU.
 
 
-EXPERIEMNTS RESULTS
+EXPERIMENTS RESULTS
 
 Improvements: Maybe use gradient clipping for high batch sizes ?!
 
@@ -227,12 +230,12 @@ Exp2:
     config2: 85.97 test acc
     config3: 85.35 test acc
     config4: 82.79 test acc
-    config5: ??????
+    config5: ????? test acc
 
 Exp3:
     For batch_size >= 512, the scaling rule + GhostBN does not help anymore.
 
-    config1: 88.22 test acc ; 51.4 sec avg time / epoch
+    config1: 88.22 test acc ; 51.40 sec avg time / epoch
     config2: 88.51 test acc ; 48.31 sec avg time / epoch
     config3: 88.44 test acc ; 40.81 sec avg time / epoch
     config4: 88.18 test acc ; 40.81 sec avg time / epoch
@@ -255,6 +258,8 @@ Exp5:
     config3: 90.78 test acc ; 49.99 sec avg time / epoch
     config4: 90.78 test acc ; 42.83 sec avg time / epoch
     config5: 90.23 test acc ; 42.67 sec avg time / epoch
+
     config6: 82.79 test acc ; 42.40 sec avg time / epoch ----> with lr_factor 10
     config61: 88.61 test acc                             ----> with lr_factor 5
-    config62:
+    config62: 89.86 test acc                             ----> with lr_factor 2
+    config63: ????? test acc                             ----> just triangular
