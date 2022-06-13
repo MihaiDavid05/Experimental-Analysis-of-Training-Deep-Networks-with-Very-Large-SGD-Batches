@@ -251,7 +251,7 @@ Exp4:
 Exp5:
     Maybe use CyclicLR here !!!
 
-    config1:
+    config1: 90.98 test acc ; 59.38 sec avg time / epoch
     config2:
     config3:
     config4:
