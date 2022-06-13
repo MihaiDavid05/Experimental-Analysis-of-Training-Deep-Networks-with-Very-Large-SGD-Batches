@@ -219,7 +219,7 @@ Exp1:
     config3: 82.37 test acc ; 41.33 sec avg time / epoch
     config4: 74.40 test acc ; 41.25 sec avg time / epoch
     config5: 59.12 test acc ; 40.77 sec avg time / epoch
-    config6: ????????
+    config6: 39.46 test acc ; 38.46 sec avg time / epoch
 
 Exp2:
 
@@ -227,7 +227,7 @@ Exp2:
     config2: 85.97 test acc
     config3: 85.35 test acc
     config4: 82.79 test acc
-    config5: ???????
+    config5: ??????
 
 Exp3:
     For batch_size >= 512, the scaling rule + GhostBN does not help anymore.
@@ -237,7 +237,7 @@ Exp3:
     config3: 88.44 test acc ; 40.81 sec avg time / epoch
     config4: 88.18 test acc ; 40.81 sec avg time / epoch
     config5: 81.29 test acc ; 39.22 sec avg time / epoch
-    config6: ???????
+    config6: 79.07 test acc ; 34.04 sec avg time / epoch
 
 Exp4:
 
@@ -246,7 +246,7 @@ Exp4:
     config3: 87.79 test acc ; 33.09 sec avg time / epoch
     config4: 87.85 test acc ; 32.30 sec avg time / epoch
     config5: 87.27 test acc ; 32.09 sec avg time / epoch
-    config6: ???????
+    config6: 85.97 test acc ; 33.39 sec avg time / epoch
 
 Exp5:
 
@@ -255,5 +255,6 @@ Exp5:
     config3: 90.78 test acc ; 49.99 sec avg time / epoch
     config4: 90.78 test acc ; 42.83 sec avg time / epoch
     config5: 90.23 test acc ; 42.67 sec avg time / epoch
-    config6: 82.79 test acc ; 42.40 sec avg time / epoch
-
+    config6: 82.79 test acc ; 42.40 sec avg time / epoch ----> with lr_factor 10
+    config61: 88.61 test acc                             ----> with lr_factor 5
+    config62:

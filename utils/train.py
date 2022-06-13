@@ -55,7 +55,8 @@ def train(dataset, net, config, writer, device='cpu'):
     elif use_lr_scheduler == 'CyclicLR':
         lr_factor = 10
         if batch_size >= 1024:
-            lr_factor = 5
+            # TODO: Was 5
+            lr_factor = 2
         iter_per_epoch = len(train_images) // batch_size
         scheduler = optim.lr_scheduler.CyclicLR(optimizer, base_lr=lr/lr_factor, max_lr=lr*lr_factor,
                                                 step_size_up=12*iter_per_epoch, mode='triangular2', gamma=1.0)
