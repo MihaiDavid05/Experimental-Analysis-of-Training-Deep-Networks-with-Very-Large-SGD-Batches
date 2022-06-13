@@ -213,7 +213,6 @@ EXPERIEMNTS RESULTS
 Improvements: Maybe use gradient clipping for high batch sizes ?!
 
 Exp1:
-    Looks fair enough !
 
     config1: 86.37 test acc ; 51.30 sec avg time / epoch
     config2: 85.08 test acc ; 48.20 sec avg time / epoch
@@ -239,8 +238,6 @@ Exp3:
     config5: 81.29 test acc ; 39.22 sec avg time / epoch ----- 78.91 test acc with GhostBN for classifier (maybe it is bad implemented)
 
 Exp4:
-    GradualWarmup initial value not done right (see gradual_LR.png)!!!! I think the scheduler step must be in the beginning and also change milestones!
-    BUT, it helps for bigger batches !
 
     config1: 87.95 test acc ; 48.44 sec avg time / epoch
     config2: 88.05 test acc ; 45.91 sec avg time / epoch
@@ -249,7 +246,6 @@ Exp4:
     config5: 88.00 test acc ; 34.58 sec avg time / epoch
 
 Exp5:
-    Use CyclicLR
 
     config1: 90.98 test acc ; 59.38 sec avg time / epoch
     config2: 91.32 test acc ; 44.55 sec avg time / epoch

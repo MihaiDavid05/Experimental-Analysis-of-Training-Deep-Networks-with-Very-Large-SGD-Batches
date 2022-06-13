@@ -1,0 +1,19 @@
+{
+  "name": "",
+  "data": "data",
+  "log_dir": "logs",
+  "model": "vgg13ghostbn",
+  "dataset": "cifar10",
+  "batch_size": 1024,
+  "epochs": 100,
+  "learning_rate": 0.32,
+  "early_stopping": 0,
+  "early_stopping_patience": 12,
+  "weight_decay": 0.000001,
+  "use_lr_scheduler": "GradualWarmup",
+  "step_lr_gamma": 0.5,
+  "step_lr_stepsize": 30,
+  "optimizer": "sgd",
+  "checkpoint_dir": "checkpoints",
+  "augmentations": 1
+}
