@@ -219,14 +219,15 @@ Exp1:
     config3: 82.37 test acc ; 41.33 sec avg time / epoch
     config4: 74.40 test acc ; 41.25 sec avg time / epoch
     config5: 59.12 test acc ; 40.77 sec avg time / epoch
+    config6: ????????
 
 Exp2:
 
-    config1:
-    config2:
-    config3:
-    config4:
-    config5:
+    config1: 86.58 test acc
+    config2: 85.97 test acc
+    config3: 85.35 test acc
+    config4: 82.79 test acc
+    config5: ???????
 
 Exp3:
     For batch_size >= 512, the scaling rule + GhostBN does not help anymore.
@@ -235,20 +236,24 @@ Exp3:
     config2: 88.51 test acc ; 48.31 sec avg time / epoch
     config3: 88.44 test acc ; 40.81 sec avg time / epoch
     config4: 88.18 test acc ; 40.81 sec avg time / epoch
-    config5: 81.29 test acc ; 39.22 sec avg time / epoch ----- 78.91 test acc with GhostBN for classifier (maybe it is bad implemented)
+    config5: 81.29 test acc ; 39.22 sec avg time / epoch
+    config6: ???????
 
 Exp4:
 
-    config1: 87.95 test acc ; 48.44 sec avg time / epoch
-    config2: 88.05 test acc ; 45.91 sec avg time / epoch
-    config3: 87.97 test acc ; 32.58 sec avg time / epoch
-    config4: 88.03 test acc ; 36.06 sec avg time / epoch
-    config5: 88.00 test acc ; 34.58 sec avg time / epoch
+    config1: 87.91 test acc ; 49.71 sec avg time / epoch
+    config2: 88.25 test acc ; 45.73 sec avg time / epoch
+    config3: 87.79 test acc ; 33.09 sec avg time / epoch
+    config4: 87.85 test acc ; 32.30 sec avg time / epoch
+    config5: 87.27 test acc ; 32.09 sec avg time / epoch
+    config6: ???????
 
 Exp5:
 
     config1: 90.98 test acc ; 59.38 sec avg time / epoch
     config2: 91.32 test acc ; 44.55 sec avg time / epoch
-    config3: to be done !
-    config4: running
+    config3: running
+    config4: 90.78 test acc ; 42.83 sec avg time / epoch
     config5: 90.23 test acc ; 42.67 sec avg time / epoch
+    config6: ???????
+
