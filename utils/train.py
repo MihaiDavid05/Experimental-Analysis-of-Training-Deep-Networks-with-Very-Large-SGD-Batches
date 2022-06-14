@@ -53,15 +53,18 @@ def train(dataset, net, config, writer, device='cpu'):
     elif use_lr_scheduler == 'Step':
         scheduler = optim.lr_scheduler.StepLR(optimizer, step_size=step_lr_stepsize, gamma=step_lr_gamma)
     elif use_lr_scheduler == 'CyclicLR':
-        lr_factor = 10
-        if batch_size >= 1024:
-            # TODO: Was 5
-            lr_factor = 2
+
+        # lr_factor = 10
+        # if batch_size >= 1024:
+        #     # TODO: Was 5
+        #     lr_factor = 2
+
+        lr_factor = 10 * np.sqrt(32 / batch_size)
+
         iter_per_epoch = len(train_images) // batch_size
-        # scheduler = optim.lr_scheduler.CyclicLR(optimizer, base_lr=lr/lr_factor, max_lr=lr*lr_factor,
-        #                                         step_size_up=12*iter_per_epoch, mode='triangular2', gamma=1.0)
-        scheduler = optim.lr_scheduler.CyclicLR(optimizer, base_lr=lr / lr_factor, max_lr=lr * lr_factor,
-                                                step_size_up=12 * iter_per_epoch, mode='triangular', gamma=1.0)
+        scheduler = optim.lr_scheduler.CyclicLR(optimizer, base_lr=lr/lr_factor, max_lr=lr*lr_factor,
+                                                step_size_up=12*iter_per_epoch, mode='triangular2', gamma=1.0)
+
     elif use_lr_scheduler == 'GradualWarmup':
         scheduler_multisteplr = optim.lr_scheduler.MultiStepLR(optimizer, milestones=[25, 55, 85], gamma=0.1)
         scheduler = WarmupLR(scheduler_multisteplr, init_lr=0.01, num_warmup=5, warmup_strategy='linear')
