@@ -258,8 +258,10 @@ Exp5:
     config3: 90.78 test acc ; 49.99 sec avg time / epoch
     config4: 90.78 test acc ; 42.83 sec avg time / epoch
     config5: 90.23 test acc ; 42.67 sec avg time / epoch
-
     config6: 82.79 test acc ; 42.40 sec avg time / epoch ----> with lr_factor 10
+
+
     config61: 88.61 test acc                             ----> with lr_factor 5
 !!! config62: 89.87 test acc                             ----> with lr_factor 2  -------------------- THE BEST
     config63: 89.46 test acc                             ----> just triangular with l_+factor 2
+
