@@ -230,7 +230,7 @@ Exp2:
     config2: 85.97 test acc
     config3: 85.35 test acc
     config4: 82.79 test acc
-    config5: ????? test acc
+    config5: 84.35 test acc
 
 Exp3:
     For batch_size >= 512, the scaling rule + GhostBN does not help anymore.
@@ -261,5 +261,5 @@ Exp5:
 
     config6: 82.79 test acc ; 42.40 sec avg time / epoch ----> with lr_factor 10
     config61: 88.61 test acc                             ----> with lr_factor 5
-    config62: 89.87 test acc                             ----> with lr_factor 2
+!!! config62: 89.87 test acc                             ----> with lr_factor 2
     config63: 89.46 test acc                             ----> just triangular with l_+factor 2
