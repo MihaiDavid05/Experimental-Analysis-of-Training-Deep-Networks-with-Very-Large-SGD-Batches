@@ -265,3 +265,12 @@ Exp5:
 !!! config62: 89.87 test acc                             ----> with lr_factor 2  -------------------- THE BEST
     config63: 89.46 test acc                             ----> just triangular with l_+factor 2
 
+Exp6:
+
+    config1: 90.88 test acc
+    config2: 91.25 test acc
+    config3: 90.96 test acc
+    config4: 90.82 test acc
+    config5: 90.60 test acc
+    config6: 89.62 test acc
+
