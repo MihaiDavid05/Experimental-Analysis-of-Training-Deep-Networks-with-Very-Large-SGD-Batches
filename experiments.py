@@ -5,7 +5,6 @@ import torch
 from utils.network import build_network
 from utils.dataset import build_dataset
 from utils.train import train
-from utils.utils import setup
 from torch.utils.tensorboard import SummaryWriter
 from utils.utils import get_events_data
 
