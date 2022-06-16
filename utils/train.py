@@ -53,12 +53,6 @@ def train(dataset, net, config, writer, device='cpu'):
     elif use_lr_scheduler == 'Step':
         scheduler = optim.lr_scheduler.StepLR(optimizer, step_size=step_lr_stepsize, gamma=step_lr_gamma)
     elif use_lr_scheduler == 'CyclicLR':
-
-        # lr_factor = 10
-        # if batch_size >= 1024:
-        #     # TODO: Was 5
-        #     lr_factor = 2
-
         lr_factor = 10 * np.sqrt(32 / batch_size)
 
         iter_per_epoch = len(train_images) // batch_size

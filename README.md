@@ -5,8 +5,9 @@ TO BE DONE!
 
 ### Environment setup
 For our experiments we used Google Colab. We provide the notebook under `OML_notebook.ipynb`.
+It has 4 parts: Setup, Training, Event Parsing and Testing. You can find more guidance in the notebook.
 
-However, we also made our own local environment (CPU only).
+However, we also made our own local environment for quick experiments and better debugging (CPU only).
 Tested configurations locally: 
 * `Python 3.7`
 * `pytorch 1.9.0` (CPU only)
@@ -17,11 +18,6 @@ To install PyTorch (CPU only) use the following command:
 ```bash
 pip install pytorch torchvision torchaudio cpuonly -c pytorch
 ```
-For PyTorch and torchvision with CUDA installation use the following command (NOT TESTED):
-```bash
-conda install pytorch torchvision cudatoolkit=<compatible_version> -c pytorch
-```
-NOTE: Search for a compatible cudatoolkit version with your local GPU.
 
 Other necessary installations:
 ```bash
@@ -42,7 +38,7 @@ export PYTHONPATH=$PYTHONPATH:<path_to_project_folder>
 ```
 
 ### 3.Data and folder structure
-Please download the python version of CIFAR10 and CIFAR100 at this [link](https://www.cs.toronto.edu/~kriz/cifar.html).
+Please download the python version of CIFAR10 at this [link](https://www.cs.toronto.edu/~kriz/cifar.html).
 Unzip the contents under the `data` folder.
 ```
 └── PROJECT_ROOT
@@ -51,9 +47,14 @@ Unzip the contents under the `data` folder.
        |   └── cifar-100-python
        ├── checkpoints          <- models weights    
        ├── configs              <- configuration files
+       |   ├── experiment1
+           | ....
+       |   └── experiment6
        ├── logs                 <- experiments log files
        ├── src                  <- train, predict and event parser scripts
-       └── utils                <- multiple utility scripts
+       ├── utils                <- multiple utility scripts
+       ├── experiments.py       <- script used in bash scripts, for training
+       └── run_expX.sh          <- bash for deploying a specific suite of experiments on a remote GPU
 ```
 
 ### 4.Tensorboard
@@ -73,6 +74,7 @@ Example:
 cd src
 python run.py "config2"
 ```
+NOTE: If training locally, you should define a `configX.json` file right under `configs` folder.
 
 ### 6.Prediction
 For prediction on test set you can run this command:
@@ -85,6 +87,7 @@ Example:
 cd src
 python test.py "config2"
 ```
+NOTE: If testing locally, you should define a `configX.json` file right under `configs` folder.
 
 ### 7. Results
 TO BE DONE!
