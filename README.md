@@ -1,7 +1,7 @@
 # EPFL OML Project
 
 ### Abstract
-TO BE DONE!
+Batch size can have a significant impact when training deep networks with Stochastic Gradient Descent (SGD). We compare the performance of an adapted VGG13 on CIFAR-10 varying the batch size used for SGD. Furthermore, we analyze five methods of ameliorating the effect of very-large minibatches. Through them, for a batch size of 1024, we achieve a reasonable accuracy of `89.87`, significantly higher than our baseline accuracy, `39.46`.
 
 ### Environment setup
 For our experiments we used Google Colab. We provide the notebook under `OML_notebook.ipynb`.
@@ -88,9 +88,6 @@ cd src
 python test.py "config2"
 ```
 NOTE: If testing locally, you should define a `configX.json` file right under `configs` folder.
-
-### 7. Results
-TO BE DONE!
 
 
 
